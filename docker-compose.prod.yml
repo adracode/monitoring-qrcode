@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      target: production
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    command: npm run start
