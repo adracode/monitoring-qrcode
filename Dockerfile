@@ -1,7 +1,8 @@
 FROM node:12 as base
 WORKDIR /app
 COPY package.json ./
-COPY tsconfig.json ./
+COPY tsconfig-backend.json ./
+COPY tsconfig-frontend.json ./
 COPY .env ./
 COPY src/ ./src/
 RUN npm install

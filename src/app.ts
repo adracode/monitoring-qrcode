@@ -1,12 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
-import influx, {InfluxDB} from "influx";
+import {InfluxDB} from "influx";
 import routes from "./routes";
 
 const app = express();
 app.use(routes);
-app.use(express.json());
-app.use(express.static('public'));
 
 dotenv.config();
 export const influxDB = new InfluxDB({

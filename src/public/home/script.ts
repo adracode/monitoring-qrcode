@@ -8,9 +8,8 @@ request!.addEventListener('click', () => {
             'Content-Type': 'application/json',
         },
     })
-        .then(response => response.json())
         .then(data => {
-            response!.textContent = JSON.stringify(data, undefined, 2);
+            alert(data.body);
         })
         .catch(error => console.error(error));
 });

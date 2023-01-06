@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "NODE_PATH=./build node build/index.js",
-    "build": "tsc -p . && copyfiles -u 1 src/**/*.html src/**/*.css build/",
+    "build": "tsc --project tsconfig-backend.json && tsc --project tsconfig-frontend.json && copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js build/",
     "dev": "nodemon src/index.ts"
   },
   "author": "LE CESNE Benjamin, LEFEBVRE Antoine",
