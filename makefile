@@ -1,7 +1,9 @@
-all: up
+all: build up
+
+build:
+	docker-compose -f docker-compose.prod.yml build
 
 up:
-	docker-compose -f docker-compose.prod.yml build
 	docker-compose -f docker-compose.prod.yml up
 
 down:
