@@ -8,3 +8,9 @@ up:
 
 down:
 	docker-compose down
+
+backdev:
+	npm run dev
+
+frontdev:
+	npm run build && npm run start
