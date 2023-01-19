@@ -14,3 +14,7 @@ backdev:
 
 frontdev:
 	npm run build && npm run start
+
+clean:
+clear:
+	rm -r build

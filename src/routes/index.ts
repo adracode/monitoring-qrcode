@@ -5,9 +5,9 @@ import getPathPage from "../utils/path";
 
 const router = express.Router();
 
-router.use("/", express.static(getPathPage("home")))
+router.use("/", express.static(getPathPage("sensors"), {extensions:['html'], index: "sensor.html"}))
 router.use("/sensors", sensors);
-router.use("/qrcode", express.static(getPathPage("qrcode")))
+router.use("/qrcode", express.static(getPathPage("qrcode"), {redirect: false}))
 router.use("/qrcode", qrcode)
 
 export default router;

@@ -1,6 +1,8 @@
 import {InfluxDB} from "influx";
 
-type SensorData = { [type: string]: string | number };
+type RawData = { [type: string]: string | number }
+type SensorData = { type: string, value: string | number }
+type SensorDatas = SensorData[];
 type SensorName = { name: string };
 
 class Sensor {
@@ -9,7 +11,7 @@ class Sensor {
     private id: string;
     private name: string;
     private lastUpdate: number = 0;
-    private data: SensorData = {}
+    private data: SensorDatas = []
 
     constructor(id: string, name: string) {
         this.id = id;
@@ -17,20 +19,19 @@ class Sensor {
     }
 
     public needUpdate(): boolean {
-        console.log(this.lastUpdate, Date.now(), Sensor.UPDATE_INTERVAL)
         return this.lastUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
     }
 
-    public set(data: SensorData) {
+    public set(data: SensorDatas) {
         this.lastUpdate = Date.now();
         this.data = data;
     }
 
-    public get(type: string): string | number {
-        return this.data[type];
+    public get(...type: string[]): SensorDatas {
+        return this.getAll().filter((value: SensorData) => type.includes(value.type));
     }
 
-    public getAll(): SensorData {
+    public getAll(): SensorDatas {
         return structuredClone(this.data);
     }
 }
@@ -77,10 +78,18 @@ export class DataManager {
         return sensor;
     }
 
-    private async getDatabaseSensorData(id: string): Promise<SensorData> {
-        return (await this.source.query<SensorData>(
+    private async getDatabaseSensorData(id: string): Promise<SensorDatas> {
+        let raw: RawData = (await this.source.query<RawData>(
             `SELECT * FROM "${DataManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
         )).at(0) ?? {};
+        let sensorsData: SensorDatas = [];
+        for (const [key, value] of Object.entries(raw)) {
+            sensorsData.push({
+                type: key,
+                value: value
+            });
+        }
+        return sensorsData;
     }
 
     private static sanitize(input: string): string {
