@@ -1,4 +1,4 @@
-FROM node:12 as base
+FROM node:18 as base
 WORKDIR /app
 COPY package.json ./
 COPY tsconfig-backend.json ./

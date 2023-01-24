@@ -2,7 +2,7 @@ import {InfluxDB} from "influx";
 
 type RawData = { [type: string]: string | number }
 type SensorData = { type: string, value: string | number }
-type SensorDatas = SensorData[];
+type SensorsData = SensorData[];
 type SensorName = { name: string };
 
 class Sensor {
@@ -11,7 +11,7 @@ class Sensor {
     private id: string;
     private name: string;
     private lastUpdate: number = 0;
-    private data: SensorDatas = []
+    private data: SensorsData = []
 
     constructor(id: string, name: string) {
         this.id = id;
@@ -22,32 +22,32 @@ class Sensor {
         return this.lastUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
     }
 
-    public set(data: SensorDatas) {
+    public set(data: SensorsData) {
         this.lastUpdate = Date.now();
         this.data = data;
     }
 
-    public get(...type: string[]): SensorDatas {
+    public get(...type: string[]): SensorsData {
         return this.getAll().filter((value: SensorData) => type.includes(value.type));
     }
 
-    public getAll(): SensorDatas {
+    public getAll(): SensorsData {
         return structuredClone(this.data);
     }
 }
 
-export class DataManager {
+export class SensorManager {
 
-    private static instance: DataManager;
+    private static instance: SensorManager;
 
     private constructor() {
     }
 
-    public static getInstance(): DataManager {
-        if (DataManager.instance === undefined) {
-            DataManager.instance = new DataManager();
+    public static getInstance(): SensorManager {
+        if (SensorManager.instance === undefined) {
+            SensorManager.instance = new SensorManager();
         }
-        return DataManager.instance;
+        return SensorManager.instance;
     }
 
     private source = new InfluxDB({
@@ -67,7 +67,7 @@ export class DataManager {
     }
 
     public async getSensor(id: string): Promise<Sensor> {
-        id = DataManager.sanitize(id);
+        id = SensorManager.sanitize(id);
         if (!this.sensors.has(id)) {
             this.sensors.set(id, new Sensor(id, id));
         }
@@ -78,18 +78,13 @@ export class DataManager {
         return sensor;
     }
 
-    private async getDatabaseSensorData(id: string): Promise<SensorDatas> {
-        let raw: RawData = (await this.source.query<RawData>(
-            `SELECT * FROM "${DataManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
-        )).at(0) ?? {};
-        let sensorsData: SensorDatas = [];
-        for (const [key, value] of Object.entries(raw)) {
-            sensorsData.push({
-                type: key,
-                value: value
-            });
-        }
-        return sensorsData;
+    private async getDatabaseSensorData(id: string): Promise<SensorsData> {
+        return Object.entries((await this.source.query<RawData>(
+            `SELECT * FROM "${SensorManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
+        )).at(0) ?? {}).map(([dataType, data]) => ({
+            type: dataType,
+            value: data
+        }));
     }
 
     private static sanitize(input: string): string {
