@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "NODE_PATH=./build node build/index.js",
-    "build": "tsc --project tsconfig-backend.json && tsc --project tsconfig-frontend.json && copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js build/",
+    "build": "tsc --project tsconfig-backend.json && tsc --project tsconfig-frontend.json && copyfiles -u 1 \"src/**/*.!(ts)\" build/",
     "dev": "nodemon src/index.ts"
   },
   "author": "LE CESNE Benjamin, LEFEBVRE Antoine",
@@ -14,6 +14,7 @@
     "express": "^4.17.1",
     "influx": "^5.9.3",
     "qrcode": "^1.5.1",
+    "sqlite": "^4.1.2",
     "sqlite3": "^5.1.4"
   },
   "devDependencies": {

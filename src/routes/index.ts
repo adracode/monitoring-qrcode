@@ -1,7 +1,7 @@
 import express from "express";
 import sensors from "./sensors";
 import qrcode from "./qrcode-generator";
-import getPathPage from "../utils/path";
+import {getPathPage} from "../utils/path";
 
 const router = express.Router();
 

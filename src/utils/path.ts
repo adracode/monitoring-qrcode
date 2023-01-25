@@ -1,5 +1,9 @@
 import path from "path";
 
-export default function getPathPage(pathPage: string){
+export function getPathPage(pathPage: string){
     return path.join(__dirname, '/../public/', pathPage);
+}
+
+export function getSQLFile(pathFile: string){
+    return path.join(__dirname, '/../sql/', pathFile);
 }
