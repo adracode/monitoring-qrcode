@@ -1,40 +1,54 @@
 import crypto from "crypto";
 
-export type SensorData = { type: string, value: string | number }
+export type SensorData = { type: string, value: string | number };
 export type SensorsData = SensorData[];
+export type TypesLabel = { [type: string]: string };
+export type ConfigurationSensor = Partial<{
+    label: string,
+    type: TypesLabel
+}>;
 
 export class Sensor {
     private static readonly UPDATE_INTERVAL = 10 * 60 * 1_000;
 
-    private id: string;
-    private name: string;
+    private readonly id: string;
     private lastUpdate: number = 0;
     private data: SensorsData = [];
+    private config: ConfigurationSensor = {}
 
-    constructor(id: string, name: string) {
+    constructor(id: string) {
         this.id = id;
-        this.name = name;
     }
 
     public needUpdate(): boolean {
         return this.lastUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
     }
 
-    public set(data: SensorsData) {
+    public setConfiguration(config: ConfigurationSensor) {
+        this.config = config;
+    }
+
+    public setData(data: SensorsData) {
         this.lastUpdate = Date.now();
         this.data = data;
     }
 
-    public get(type: string[]): SensorsData {
-        return this.getAll().filter((value: SensorData) => type.includes(value.type));
-    }
-
-    public getAll(): SensorsData {
-        return structuredClone(this.data);
+    public get(type?: string[]): SensorsData {
+        const types = type ?? Object.keys(this.config.type ?? {});
+        return this.data
+            .filter((data: SensorData) => types.includes(data.type))
+            .map((data: SensorData) => ({
+                ...data,
+                type: this.config.type?.[data.type] ?? data.type
+            }));
     }
 
     public isEmpty(): boolean {
         return this.data.length === 0;
+    }
+
+    public hasConfig(): boolean {
+        return Object.keys(this.config).length !== 0;
     }
 
     public getId(): string {
