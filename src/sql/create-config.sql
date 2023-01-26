@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS sensors (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
     sensor_id TEXT UNIQUE,
-    label TEXT
+    label TEXT,
+    url_id TEXT
 );
 
 CREATE TABLE IF NOT EXISTS types (

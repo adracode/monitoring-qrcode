@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export type SensorData = { type: string, value: string | number }
 export type SensorsData = SensorData[];
 
@@ -37,5 +39,9 @@ export class Sensor {
 
     public getId(): string {
         return this.id;
+    }
+
+    public generateUrlId(): string {
+        return crypto.randomBytes(33).toString("base64url");
     }
 }
