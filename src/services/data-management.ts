@@ -35,7 +35,7 @@ export class SensorManager {
 
     public static getInstance(): SensorManager {
         if (SensorManager.instance === undefined) {
-            SensorManager.instance = new SensorManager();
+            throw new Error("Object not initialized, use SensorManager.init() to create.")
         }
         return SensorManager.instance;
     }
@@ -60,28 +60,25 @@ export class SensorManager {
         return (await this.source.query<SensorName>(`SHOW MEASUREMENTS`)).map(sensor => sensor.name);
     }
 
+    public static async init(){
+        this.instance = new SensorManager();
+    }
+
+    public async init(){
+        for (let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
+            this.urlIds.set(sensorId.urlId, sensorId.id);
+        }
+    }
+
     /**
      * Renvoie l'ID du capteur utilisé dans l'URL pour afficher ses données.
      * Si le capteur n'existe pas, renvoie null.
      * Cet ID est un nombre généré aléatoirement en base64 (avec '-' et '_')
-     * @param sensor L'ID ou le capteur dont on veut l'ID d'URL.
+     * @param sensorUrlId L'ID ou le capteur dont on veut l'ID d'URL.
      */
-    public async getUrlId(sensor: Sensor | string): Promise<string | null> {
-        if (!(sensor instanceof Sensor)) {
-            const getSensor = (await this.getSensor(sensor, {update: false}))!;
-            if (getSensor == null) {
-                return null;
-            }
-            sensor = getSensor;
-        }
-        let id = this.urlIds.get(sensor.getId());
-        if (id !== undefined) {
-            return id;
-        }
-        id = sensor.generateUrlId();
-
-        this.urlIds.set(sensor.getId(), id);
-        return id;
+    public async getSensorFromURL(sensorUrlId: string): Promise<Sensor | null> {
+        let sensorId = this.urlIds.get(sensorUrlId);
+        return sensorId != null ? this.getSensor(sensorId) : null;
     }
 
     /**
@@ -151,11 +148,9 @@ export class ConfigurationManager {
 
     /**
      * Ouvre la base de données de configuration et créer les tables si nécessaire.
-     * Synchronise la base de données de configuration avec la base de données des capteurs.
-     * Les capteurs qui ne sont plus dans la base de données des capteurs ne sont pas supprimées de la configuration.
      * @public
      */
-    public static async build() {
+    public static async init() {
         if (this.instance != null) {
             return this.getInstance();
         }
@@ -164,16 +159,23 @@ export class ConfigurationManager {
             driver: wrapped.Database
         });
         await database.exec(ConfigurationManager.getSQLiteFile("create-config.sql"));
+        this.instance = new ConfigurationManager(database);
+    }
+
+    /**
+     * Synchronise la base de données de configuration avec la base de données des capteurs.
+     * Les capteurs qui ne sont plus dans la base de données des capteurs ne sont pas supprimées de la configuration.
+     */
+    public async init(){
         let currentSensors = await SensorManager.getInstance().getAllSensorsId();
-        let configuredSensors = (await database.all<{ sensor_id: string }[]>(
+        let configuredSensors = (await this.source.all<{ sensor_id: string }[]>(
             `SELECT sensor_id FROM "sensors"`)).map(sensor => sensor.sensor_id);
-        let insert = await database.prepare(
+        let insert = await this.source.prepare(
             `INSERT INTO "sensors" ("sensor_id", "label") values (?, ?)`);
         for (const newSensor of currentSensors.filter(sensor => !configuredSensors.includes(sensor))) {
             await insert.run(newSensor, newSensor);
         }
         await insert.finalize();
-        this.instance = new ConfigurationManager(database);
     }
 
     private readonly source: sqlite.Database;
@@ -182,16 +184,25 @@ export class ConfigurationManager {
         let manager = SensorManager.getInstance();
         const insert = await this.source.prepare("UPDATE sensors SET url_id = ? WHERE sensor_id = ?");
         for (const sensor of sensors) {
-            let urlId = await manager.getUrlId(sensor);
-            await insert.run(urlId, sensor);
+            let urlId = (await manager.getSensor(sensor, {update: false, updateConfig: false}))?.getUrlId();
+            if(urlId != null){
+                await insert.run(urlId, sensor);
+            }
         }
         await insert.finalize();
     }
 
+    public async getUrlIds(): Promise<{id: string, urlId: string}[]> {
+        let newVar = await this.source.all<{ sensor_id: string, url_id: string }[]>(
+            `SELECT sensor_id, url_id FROM "sensors"`
+        ) ?? [];
+        return newVar.map(query => ({id: query.sensor_id, urlId: query.url_id}));
+    }
+
     public async getConfiguration(sensorId: string | Sensor): Promise<ConfigurationSensor | null> {
         const sensor = sensorId instanceof Sensor ? sensorId.getId() : sensorId;
-        const labeledSensor = await this.source.get<{ sensor_id: string, label: string }>(
-            `SELECT sensor_id, label FROM "sensors" WHERE sensor_id = ?`, sensor
+        const labeledSensor = await this.source.get<{ sensor_id: string, label: string, url_id: string }>(
+            `SELECT sensor_id, label, url_id FROM "sensors" WHERE sensor_id = ?`, sensor
         );
         if (labeledSensor == undefined) {
             return null;
@@ -201,6 +212,7 @@ export class ConfigurationManager {
         );
         return {
             label: labeledSensor.label ?? labeledSensor.sensor_id,
+            urlId: labeledSensor.url_id,
             type: types.reduce((acc: { [type: string]: string }, curr: { type_id: string, label: string }) => {
                 acc[curr.type_id] = curr.label ?? curr.type_id;
                 return acc;

@@ -24,10 +24,14 @@ if (sensorId != null) {
     }).then(async data => {
         let res = await data.json();
         clearTimeout(timeOut);
+        if(res.hasOwnProperty("message")){
+            console.log(res.message);
+            return;
+        }
         const sensorDataElement = document.getElementById("data")!;
-        res.forEach((values: {type: string, value: string}) => {
+        res.forEach((data: {data: string}) => {
             let p: HTMLParagraphElement = document.createElement("p");
-            p.innerText = `${values.type}: ${values.value}\n`;
+            p.innerText = `${data.data}\n`;
             sensorDataElement.appendChild(p);
         });
         show(sensorDataElement);

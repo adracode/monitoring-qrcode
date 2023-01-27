@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/genids", async (req, res) => {
     let sensorManager = SensorManager.getInstance();
     const sensors = await sensorManager.getAllSensorsId();
-    let ids = await Promise.all(sensors.map(async id => await sensorManager.getUrlId(id)));
+    let ids = await Promise.all(sensors.map(async id => (await sensorManager.getSensor(id, {update: false}))!.getUrlId()));
     res.status(200).send(ids);
 });
 

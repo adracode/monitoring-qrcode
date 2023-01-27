@@ -5,7 +5,8 @@ export type SensorsData = SensorData[];
 export type TypesLabel = { [type: string]: string };
 export type ConfigurationSensor = Partial<{
     label: string,
-    type: TypesLabel
+    type: TypesLabel,
+    urlId: string
 }>;
 
 export class Sensor {
@@ -53,6 +54,9 @@ export class Sensor {
 
     public getId(): string {
         return this.id;
+    }
+    public getUrlId(): string | undefined {
+        return this.config.urlId;
     }
 
     public generateUrlId(): string {
