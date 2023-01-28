@@ -1,27 +1,74 @@
-body,html {
+* {
+    box-sizing: border-box;
+}
+
+body, html {
     margin: 0;
     padding: 0;
 }
-* {
-    box-sizing: border-box;
+
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) fixed;
+    background-size: 200% 200%;
+    animation: gradient 30s ease infinite;
 }
 
 div {
     font-family: Helvetica, sans-serif;
 }
 
-.center {
+h3 {
+    font-size: 1.5em;
+}
+
+body .container {
+    width: 75%;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 48px;
+}
+
+.box {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    padding: 30px;
+    flex-basis: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 10px;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: black;
     word-wrap: break-word;
 }
 
-/* https://loading.io/css/ */
+/* Animation de fond */
+@keyframes gradient {
+    0% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* Loading animation
+   https://loading.io/css/ */
 .lds-spinner {
     color: #ffffff;
     display: inline-block;
@@ -118,26 +165,4 @@ div {
 
 .hidden {
     display: none;
-}
-
-
-body {
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) fixed;
-    background-size: 200% 200%;
-    animation: gradient 30s ease infinite;
-    height: 100vh;
-}
-
-@keyframes gradient {
-    0% {
-        background-position: 0 0;
-    }
-
-    50% {
-        background-position: 100% 100%;
-    }
-
-    100% {
-        background-position: 0 0;
-    }
 }

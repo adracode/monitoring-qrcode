@@ -2,11 +2,11 @@ function getSensorId(): string | null {
     return new URLSearchParams(window.location.search).get("s");
 }
 
-function hide(element: HTMLElement){
+function hide(element: HTMLElement) {
     element.classList.add("hidden")
 }
 
-function show(element: HTMLElement){
+function show(element: HTMLElement) {
     element.classList.remove("hidden")
 }
 
@@ -24,15 +24,20 @@ if (sensorId != null) {
     }).then(async data => {
         let res = await data.json();
         clearTimeout(timeOut);
-        if(res.hasOwnProperty("message")){
+        if (res.hasOwnProperty("message")) {
             console.log(res.message);
             return;
         }
         const sensorDataElement = document.getElementById("data")!;
-        res.forEach((data: {data: string}) => {
-            let p: HTMLParagraphElement = document.createElement("p");
-            p.innerText = `${data.data}\n`;
-            sensorDataElement.appendChild(p);
+        res.forEach((response: { data: string }) => {
+            const data = response.data.split(":")
+            let container: HTMLDivElement = document.createElement("div");
+            container.classList.add("box");
+            container.innerHTML = `
+                <h4>${data[0]}</h4>
+                <h3>${data[1]}</h3>
+            `;
+            sensorDataElement.appendChild(container);
         });
         show(sensorDataElement);
         hide(loading);
