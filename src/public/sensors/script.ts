@@ -10,6 +10,19 @@ function show(element: HTMLElement) {
     element.classList.remove("hidden")
 }
 
+function displayData(parent: HTMLElement, toDisplay: { title: string, data: string }[]) {
+    toDisplay.forEach((data: { title: string, data: string }) => {
+        let container: HTMLDivElement = document.createElement("div");
+        container.classList.add("box");
+        container.innerHTML = `
+                <h4>${data.title}</h4>
+                <h3>${data.data}</h3>
+            `;
+        parent.appendChild(container);
+    });
+}
+
+const sensorDataElement = document.getElementById("data")!;
 const sensorId = getSensorId();
 if (sensorId != null) {
     let loading = document.getElementById("loading")!;
@@ -22,27 +35,16 @@ if (sensorId != null) {
             'Content-Type': 'application/json',
         }
     }).then(async data => {
-        let res = await data.json();
+        let res: { data: string }[] = await data.json();
         clearTimeout(timeOut);
-        if (res.hasOwnProperty("message")) {
-            console.log(res.message);
-            return;
-        }
-        const sensorDataElement = document.getElementById("data")!;
-        res.forEach((response: { data: string }) => {
-            const data = response.data.split(":")
-            let container: HTMLDivElement = document.createElement("div");
-            container.classList.add("box");
-            container.innerHTML = `
-                <h4>${data[0]}</h4>
-                <h3>${data[1]}</h3>
-            `;
-            sensorDataElement.appendChild(container);
-        });
+        displayData(sensorDataElement, res.map((dataType: { data: string }) => {
+            const titleAndData = dataType.data.split(":");
+            return {title: titleAndData[0], data: titleAndData[1]}
+        }));
         show(sensorDataElement);
         hide(loading);
     }).catch(error => console.error(error));
 } else {
-    show(document.getElementById("noSensor")!);
+    displayData(sensorDataElement, [{title: "Erreur", data: "Aucun capteur précisé"}]);
 }
 

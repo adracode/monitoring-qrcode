@@ -42,7 +42,7 @@ body .container {
     flex-basis: 0;
     flex-grow: 1;
     flex-shrink: 1;
-    margin: 10px;
+    margin: 15px;
     white-space: nowrap;
     text-align: center;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
