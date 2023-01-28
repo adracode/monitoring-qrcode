@@ -13,17 +13,17 @@ type RawData = { [type: string]: string | number }
  */
 type GetSensorOptions = {
     updateConfig?: boolean,
-    update?: boolean,
-    forceUpdate?: boolean
+    updateData?: boolean,
+    forceUpdateData?: boolean
 } & ({
-    update: true,
-    forceUpdate: true
+    updateData: true,
+    forceUpdateData: true
 } | {
-    update: true,
-    forceUpdate: false
+    updateData: true,
+    forceUpdateData: false
 } | {
-    update: false,
-    forceUpdate?: false
+    updateData: false,
+    forceUpdateData?: false
 })
 
 export class SensorManager {
@@ -92,7 +92,7 @@ export class SensorManager {
     public async getSensor(id: string, options?: GetSensorOptions): Promise<Sensor | null> {
         id = SensorManager.sanitize(id);
         let sensor: Sensor = this.sensors.get(id) ?? new Sensor(id);
-        if (options?.forceUpdate || ((options?.update ?? true) && sensor.needUpdate())) {
+        if (options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
             sensor.setData(await this.getDatabaseSensorData(id));
             if (sensor.isEmpty()) {
                 return null;
@@ -184,7 +184,7 @@ export class ConfigurationManager {
         let manager = SensorManager.getInstance();
         const insert = await this.source.prepare("UPDATE sensors SET url_id = ? WHERE sensor_id = ?");
         for (const sensor of sensors) {
-            let urlId = (await manager.getSensor(sensor, {update: false, updateConfig: false}))?.getUrlId();
+            let urlId = (await manager.getSensor(sensor, {updateData: false, updateConfig: false}))?.getUrlId();
             if(urlId != null){
                 await insert.run(urlId, sensor);
             }

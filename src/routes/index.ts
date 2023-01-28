@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use("/", express.static(getPathPage("sensors"), {extensions:['html'], index: "sensor.html"}))
 router.use("/sensors", sensors);
-router.use("/qrcode", express.static(getPathPage("qrcode"), {redirect: false}))
+router.use("/qrcode", express.static(getPathPage("qrcode"), {extensions: ['html']}))
 router.use("/qrcode", qrcode)
 
 //router.use("/dev", express.static(getPathPage("dev")))
