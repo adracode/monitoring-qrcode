@@ -1,3 +1,5 @@
+.PHONY: build up down dev
+
 all: build up
 
 build:
@@ -9,10 +11,7 @@ up:
 down:
 	docker-compose down
 
-backdev:
-	npm run dev
-
-frontdev:
+dev:
 	npm run build && npm run start
 
 .PHONY: build

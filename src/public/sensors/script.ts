@@ -2,14 +2,27 @@ function getSensorId(): string | null {
     return new URLSearchParams(window.location.search).get("s");
 }
 
-function hide(element: HTMLElement){
+function hide(element: HTMLElement) {
     element.classList.add("hidden")
 }
 
-function show(element: HTMLElement){
+function show(element: HTMLElement) {
     element.classList.remove("hidden")
 }
 
+function displayData(parent: HTMLElement, toDisplay: { title: string, data: string }[]) {
+    toDisplay.forEach((data: { title: string, data: string }) => {
+        let container: HTMLDivElement = document.createElement("div");
+        container.classList.add("box");
+        container.innerHTML = `
+                <h4>${data.title}</h4>
+                <h3>${data.data}</h3>
+            `;
+        parent.appendChild(container);
+    });
+}
+
+const sensorDataElement = document.getElementById("data")!;
 const sensorId = getSensorId();
 if (sensorId != null) {
     let loading = document.getElementById("loading")!;
@@ -22,18 +35,16 @@ if (sensorId != null) {
             'Content-Type': 'application/json',
         }
     }).then(async data => {
-        let res = await data.json();
+        let res: { data: string }[] = await data.json();
         clearTimeout(timeOut);
-        const sensorDataElement = document.getElementById("data")!;
-        res.forEach((values: {type: string, value: string}) => {
-            let p: HTMLParagraphElement = document.createElement("p");
-            p.innerText = `${values.type}: ${values.value}\n`;
-            sensorDataElement.appendChild(p);
-        });
+        displayData(sensorDataElement, res.map((dataType: { data: string }) => {
+            const titleAndData = dataType.data.split(":");
+            return {title: titleAndData[0], data: titleAndData[1]}
+        }));
         show(sensorDataElement);
         hide(loading);
     }).catch(error => console.error(error));
 } else {
-    show(document.getElementById("noSensor")!);
+    displayData(sensorDataElement, [{title: "Erreur", data: "Aucun capteur précisé"}]);
 }
 

@@ -1,34 +1,87 @@
-/* Styles pour le nombre */
-#data {
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) fixed;
+    background-size: 200% 200%;
+    animation: gradient 30s ease infinite;
+}
+
+div {
+    font-family: Helvetica, sans-serif;
+}
+
+h3 {
+    font-size: 1.5em;
+}
+
+body .container {
+    width: 75%;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 72px;
+}
+
+.box {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    padding: 30px;
+    flex-basis: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 15px;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    font-size: 24px;
     font-weight: bold;
     color: black;
     word-wrap: break-word;
 }
 
-#loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* Animation de fond */
+@keyframes gradient {
+    0% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
 }
 
-/* https://loading.io/css/ */
+/* Loading animation
+   https://loading.io/css/ */
 .lds-spinner {
-    color: blueviolet;
+    color: #ffffff;
     display: inline-block;
     position: relative;
     width: 80px;
     height: 80px;
 }
+
 .lds-spinner div {
     transform-origin: 40px 40px;
     animation: lds-spinner 1.2s linear infinite;
 }
+
 .lds-spinner div:after {
     content: " ";
     display: block;
@@ -38,56 +91,69 @@
     width: 6px;
     height: 18px;
     border-radius: 20%;
-    background: blueviolet;
+    background: #ffffff;
 }
+
 .lds-spinner div:nth-child(1) {
     transform: rotate(0deg);
     animation-delay: -1.1s;
 }
+
 .lds-spinner div:nth-child(2) {
     transform: rotate(30deg);
     animation-delay: -1s;
 }
+
 .lds-spinner div:nth-child(3) {
     transform: rotate(60deg);
     animation-delay: -0.9s;
 }
+
 .lds-spinner div:nth-child(4) {
     transform: rotate(90deg);
     animation-delay: -0.8s;
 }
+
 .lds-spinner div:nth-child(5) {
     transform: rotate(120deg);
     animation-delay: -0.7s;
 }
+
 .lds-spinner div:nth-child(6) {
     transform: rotate(150deg);
     animation-delay: -0.6s;
 }
+
 .lds-spinner div:nth-child(7) {
     transform: rotate(180deg);
     animation-delay: -0.5s;
 }
+
 .lds-spinner div:nth-child(8) {
     transform: rotate(210deg);
     animation-delay: -0.4s;
 }
+
 .lds-spinner div:nth-child(9) {
     transform: rotate(240deg);
     animation-delay: -0.3s;
 }
+
 .lds-spinner div:nth-child(10) {
     transform: rotate(270deg);
     animation-delay: -0.2s;
 }
+
 .lds-spinner div:nth-child(11) {
     transform: rotate(300deg);
     animation-delay: -0.1s;
 }
+
 .lds-spinner div:nth-child(12) {
     transform: rotate(330deg);
     animation-delay: 0s;
 }
+
 @keyframes lds-spinner {
     0% {
         opacity: 1;
@@ -96,7 +162,6 @@
         opacity: 0;
     }
 }
-
 
 .hidden {
     display: none;

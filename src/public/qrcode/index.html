@@ -9,10 +9,10 @@
 <body>
 <form id=generate-qrcode>
     <h1>Générer un QRCode</h1>
-    <p>Entrez l'id du capteur dont le QRCode doit être généré:</p>
-    <label for="input"></label><br>
-    <input type="text" id="input" name="input"><br>
-    <button type="submit">Générer</button>
+    <label for="sensor">Choisir un capteur :</label>
+    <select id="sensor" name="sensor">
+    </select>
+    <input type="submit" value="Générer">
 </form>
 <script src="./script.js"></script>
 </body>
