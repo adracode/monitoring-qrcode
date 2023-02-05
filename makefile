@@ -15,6 +15,8 @@ backdev:
 frontdev:
 	npm run build && npm run start
 
+.PHONY: build
+
 clean:
 clear:
 	rm -r build
