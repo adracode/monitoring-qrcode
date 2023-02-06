@@ -1,12 +1,13 @@
-import {InfluxDB} from "influx";
-import sqlite, {open} from "sqlite"
+import { InfluxDB } from "influx";
+import sqlite, { open } from "sqlite"
 import wrapped from "sqlite3"
-import {ConfigurationSensor, Sensor, SensorsData} from "./sensor"
-import {getSQLFile} from "../utils/path"
+import { ConfigurationSensor, Sensor, SensorsData } from "./sensor"
+import { getSQLFile } from "../utils/path"
 import * as fs from "fs";
 
 type SensorName = { name: string };
 type RawData = { [type: string]: string | number }
+type Config = { [id: string]: { label: string, fields: [{ name: string, checked: boolean }] } }
 
 /**
  * Indique si l'on veut les dernières données de la base de données
@@ -60,11 +61,11 @@ export class SensorManager {
         return (await this.source.query<SensorName>(`SHOW MEASUREMENTS`)).map(sensor => sensor.name);
     }
 
-    public static async init(){
+    public static async init() {
         this.instance = new SensorManager();
     }
 
-    public async init(){
+    public async init() {
         for (let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
             this.urlIds.set(sensorId.urlId, sensorId.id);
         }
@@ -101,7 +102,7 @@ export class SensorManager {
                 this.sensors.set(id, sensor);
             }
         }
-        if((options?.updateConfig ?? true) && !sensor.hasConfig()){
+        if ((options?.updateConfig ?? false) || !sensor.hasConfig()) {
             sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor))!)
         }
         return sensor;
@@ -129,6 +130,35 @@ export class SensorManager {
      */
     private static sanitize(input: string): string {
         return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
+    }
+
+    public async getSensors(): Promise<{ [name: string]: { name: string, isChecked: boolean }[] }> {
+        let allData = await this.source.query<SensorName>(`SHOW FIELD KEYS`);
+        let result: { [name: string]: { name: string, isChecked: boolean }[] } = {}
+
+        //@ts-ignore
+        await Promise.all(allData.groupRows.map(async sensor => {
+            //@ts-ignore
+            let configuredTypes: string[] = await ConfigurationManager.getInstance().getTypesBySensorId(sensor.name);
+            //@ts-ignore
+            let fields: { name: string, isChecked: boolean }[] = sensor.rows.map(field => {
+                //@ts-ignore
+                let fieldName = field.fieldKey;
+                if (configuredTypes.includes(fieldName)) {
+                    return { name: field.fieldKey, isChecked: true };
+                } else {
+                    return { name: field.fieldKey, isChecked: false };
+                }
+            });
+            result[sensor.name] = fields;
+        }));
+        return result;
+    }
+
+    public async updateSensors() {
+        for (let sensor of await this.getAllSensorsId()) {
+            this.getSensor(sensor, { updateData: false, updateConfig: true });
+        }
     }
 }
 
@@ -166,7 +196,7 @@ export class ConfigurationManager {
      * Synchronise la base de données de configuration avec la base de données des capteurs.
      * Les capteurs qui ne sont plus dans la base de données des capteurs ne sont pas supprimées de la configuration.
      */
-    public async init(){
+    public async init() {
         let currentSensors = await SensorManager.getInstance().getAllSensorsId();
         let configuredSensors = (await this.source.all<{ sensor_id: string }[]>(
             `SELECT sensor_id FROM "sensors"`)).map(sensor => sensor.sensor_id);
@@ -180,23 +210,46 @@ export class ConfigurationManager {
 
     private readonly source: sqlite.Database;
 
-    private async setConfiguration(sensors: string[]) {
-        let manager = SensorManager.getInstance();
-        const insert = await this.source.prepare("UPDATE sensors SET url_id = ? WHERE sensor_id = ?");
-        for (const sensor of sensors) {
-            let urlId = (await manager.getSensor(sensor, {updateData: false, updateConfig: false}))?.getUrlId();
-            if(urlId != null){
-                await insert.run(urlId, sensor);
+    // private async setConfiguration(sensors: string[]) {
+    //     let manager = SensorManager.getInstance();
+    //     const insert = await this.source.prepare("UPDATE sensors SET url_id = ? WHERE sensor_id = ?");
+    //     for (const sensor of sensors) {
+    //         let urlId = (await manager.getSensor(sensor, {updateData: false, updateConfig: false}))?.getUrlId();
+    //         if(urlId != null){
+    //             await insert.run(urlId, sensor);
+    //         }
+    //     }
+    //     await insert.finalize();
+    // }
+
+    public async setConfiguration(config: Config) {
+        const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
+        const insertTypes = await this.source.prepare("INSERT INTO types (type_id) VALUES (?)");
+        const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
+        const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
+        for (let sensor of Object.keys(config)) {
+            await update.run(config[sensor].label, sensor);
+            let configuredTypes = await this.getTypesBySensorId(sensor);
+            for (let field of config[sensor].fields) {
+                let fieldName = field.name;
+                let fieldChecked = field.checked;
+                if (configuredTypes.includes(fieldName)) {
+                    if (!fieldChecked) {
+                        await deleteQuery.run(sensor, fieldName);
+                    }
+                } else if (fieldChecked) {
+                    await insert.run(sensor, fieldName);
+                }
             }
+            SensorManager.getInstance().getSensor(sensor, { updateData: false, updateConfig: true });
         }
-        await insert.finalize();
     }
 
-    public async getUrlIds(): Promise<{id: string, urlId: string}[]> {
+    public async getUrlIds(): Promise<{ id: string, urlId: string }[]> {
         let newVar = await this.source.all<{ sensor_id: string, url_id: string }[]>(
             `SELECT sensor_id, url_id FROM "sensors"`
         ) ?? [];
-        return newVar.map(query => ({id: query.sensor_id, urlId: query.url_id}));
+        return newVar.map(query => ({ id: query.sensor_id, urlId: query.url_id }));
     }
 
     public async getConfiguration(sensorId: string | Sensor): Promise<ConfigurationSensor | null> {
@@ -226,6 +279,44 @@ export class ConfigurationManager {
 
     public close() {
         this.source?.close();
+    }
+
+    public async getTypesBySensorId(sensorId: string | Sensor): Promise<string[]> {
+        const sensor = sensorId instanceof Sensor ? sensorId.getId() : sensorId;
+        let configuredTypes = (await this.source.all<{ type_id: string }[]>(
+            `SELECT type_id FROM "types_by_sensor" WHERE sensor_id= ?`, sensor)).map((sensorId: { type_id: string }) => {
+                return sensorId.type_id;
+            });
+        return configuredTypes;
+    }
+
+    public async getAllTypes(): Promise<string[]> {
+        let configuredTypes = (await this.source.all<{ type_id: string }[]>(
+            `SELECT type_id FROM "types"`)).map((typeId: { type_id: string }) => {
+                return typeId.type_id;
+            });
+        return configuredTypes;
+    }
+
+    public async getFields(): Promise<{ type_id: string, label: string }[]> {
+        let configuredTypes = (await this.source.all<{ type_id: string, label: string }[]>(
+            `SELECT DISTINCT types_by_sensor.type_id, label FROM "types_by_sensor" LEFT JOIN "types" ON types_by_sensor.type_id = types.type_id`));
+        return configuredTypes;
+    }
+
+    public async setNames(fields: { name: string, label: string }[]) {
+        const update = await this.source.prepare("UPDATE types SET label = ? WHERE type_id = ?");
+        const insert = await this.source.prepare("INSERT INTO types (type_id, label) VALUES (?, ?)");
+
+        for (let field of fields) {
+            let configuredTypes = await this.getAllTypes();
+            if (configuredTypes.includes(field.name)) {
+                await update.run(field.label, field.name);
+            } else {
+                await insert.run(field.name, field.label);
+            }
+            SensorManager.getInstance().updateSensors();
+        }
     }
 
 }
