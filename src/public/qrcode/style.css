@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    text-align: left;
 }
 
 #influx-response {
@@ -12,3 +12,14 @@ h1 {
     font-size: 2em;
     margin: 0.5em 0;
 }
+
+menu {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    width: 400px;
+  }
+  
+  li {
+    flex-grow: 1;
+  }
