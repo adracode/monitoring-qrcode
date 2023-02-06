@@ -2,7 +2,8 @@
     box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
 }
@@ -46,7 +47,7 @@ body .container {
     white-space: nowrap;
     text-align: center;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    font-size: 24px;
+    font-size: 2vmax;
     font-weight: bold;
     color: black;
     word-wrap: break-word;
@@ -158,6 +159,7 @@ body .container {
     0% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
