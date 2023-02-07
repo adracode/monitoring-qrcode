@@ -1,9 +1,14 @@
 function drawQrCode(text: string) {
-    let canvas: HTMLCanvasElement | null = document.getElementById('canvas-qrcode') as HTMLCanvasElement;
-    if(canvas === null){
-        canvas = document.createElement('canvas');
-        document.body.appendChild(canvas);
-    }
+    const container = document.createElement("div");
+    container.classList.add("qr-container")
+    const canvas = document.createElement('canvas');
+    const holder = document.getElementById("qrcodes")!;
+    container.appendChild(canvas);
+    const link = document.createElement("a") as HTMLAnchorElement;
+    link.href = text;
+    link.textContent = "Lien vers le capteur";
+    container.appendChild(link);
+    holder.appendChild(container);
     // @ts-ignore
     QRCode.toCanvas(canvas, text, (error) => {
         if (error) {
@@ -16,9 +21,8 @@ function drawQrCode(text: string) {
 fetch("./sensors", {
     method: "POST"
 }).then(async res => {
-    let data: {sensors: string[]} = await res.json();
+    let data: { sensors: string[] } = await res.json();
     const list = document.getElementById("sensor") as HTMLSelectElement;
-    console.log(data.sensors)
     for (const sensor of data.sensors) {
         const optionSensor = document.createElement("option");
         optionSensor.value = optionSensor.text = sensor;
@@ -41,5 +45,5 @@ generateQrcode!.addEventListener('submit', async event => {
         },
         body: JSON.stringify(data)
     });
-    drawQrCode((await response.json() as any).qrcodeText)
+    drawQrCode(window.location.origin + (await response.json() as any).qrcodeText)
 });

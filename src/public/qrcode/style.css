@@ -13,6 +13,18 @@ h1 {
     margin: 0.5em 0;
 }
 
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#qrcodes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
 menu {
     display: flex;
     list-style: none;

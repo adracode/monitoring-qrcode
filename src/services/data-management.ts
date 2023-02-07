@@ -67,8 +67,12 @@ export class SensorManager {
 
     public async init() {
         for (let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
-            this.urlIds.set(sensorId.urlId, sensorId.id);
+            this.setUrlId(sensorId.id, sensorId.urlId);
         }
+    }
+
+    public setUrlId(sensor: string, urlId: string){
+        this.urlIds.set(urlId, sensor);
     }
 
     /**
@@ -224,7 +228,6 @@ export class ConfigurationManager {
 
     public async setConfiguration(config: Config) {
         const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
-        const insertTypes = await this.source.prepare("INSERT INTO types (type_id) VALUES (?)");
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
         const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
         for (let sensor of Object.keys(config)) {
@@ -243,6 +246,23 @@ export class ConfigurationManager {
             }
             SensorManager.getInstance().getSensor(sensor, { updateData: false, updateConfig: true });
         }
+    }
+
+    public async generateUrlId(sensor: string | Sensor): Promise<string | null> {
+        if (!(sensor instanceof Sensor)) {
+            const getSensor = await SensorManager.getInstance().getSensor(sensor);
+            if(getSensor == null){
+                return null;
+            }
+            sensor = getSensor;
+        }
+        let urlId = sensor.getUrlId();
+        if(urlId == null){
+            urlId = sensor.generateUrlId();
+            SensorManager.getInstance().setUrlId(sensor.getId(), urlId);
+            this.source.run(`UPDATE sensors SET urlId = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then();
+        }
+        return urlId;
     }
 
     public async getUrlIds(): Promise<{ id: string, urlId: string }[]> {
@@ -315,8 +335,8 @@ export class ConfigurationManager {
             } else {
                 await insert.run(field.name, field.label);
             }
-            SensorManager.getInstance().updateSensors();
         }
+        SensorManager.getInstance().updateSensors();
     }
 
 }

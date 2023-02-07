@@ -1,6 +1,6 @@
 import express from "express"
 import parser from "body-parser"
-import {SensorManager} from "../services/data-management";
+import {ConfigurationManager, SensorManager} from "../services/data-management";
 
 const router = express.Router();
 
@@ -10,11 +10,14 @@ router.post("/sensors", async (req, res) => {
 
 router.post("/generate", parser.json(), async (req, res) => {
     const sensor = await SensorManager.getInstance().getSensor(req.body.sensor, {updateData: false});
-    if(sensor?.getUrlId() == null){
+    if(sensor == null){
         res.status(404);
         return;
     }
-    res.status(200).send({qrcodeText: process.env.SENSOR_PATH! + sensor.getUrlId()});
+    if(sensor.getUrlId() == null){
+        await ConfigurationManager.getInstance().generateUrlId(sensor);
+    }
+    res.status(200).send({qrcodeText: `/sensor?s=${sensor.getUrlId()}`});
 });
 
 export default router;

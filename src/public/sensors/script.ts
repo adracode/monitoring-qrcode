@@ -35,10 +35,15 @@ if (sensorId != null) {
             'Content-Type': 'application/json',
         }
     }).then(async data => {
-        let res: { data: string }[] = await data.json();
+        let res: { sensorTitle: string, data: string[] } = await data.json();
         clearTimeout(timeOut);
-        displayData(sensorDataElement, res.map((dataType: { data: string }) => {
-            const titleAndData = dataType.data.split(":");
+        const sensorTitle = document.getElementById("sensor-name")!;
+        if (res.sensorTitle !== undefined) {
+            sensorTitle.innerText = res.sensorTitle
+            show(sensorTitle)
+        }
+        displayData(sensorDataElement, res.data.map((dataType: string) => {
+            const titleAndData = dataType.split(":");
             return {title: titleAndData[0], data: titleAndData[1]}
         }));
         show(sensorDataElement);

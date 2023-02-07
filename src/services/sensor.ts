@@ -27,6 +27,9 @@ export class Sensor {
 
     public setConfiguration(config: ConfigurationSensor) {
         this.config = config;
+        if(config.label == ""){
+            this.config.label = undefined;
+        }
     }
 
     public setData(data: SensorsData) {
@@ -55,11 +58,15 @@ export class Sensor {
     public getId(): string {
         return this.id;
     }
+
+    public getTitle(): string {
+        return this.config.label ?? this.getId();
+    }
     public getUrlId(): string | undefined {
         return this.config.urlId;
     }
 
     public generateUrlId(): string {
-        return crypto.randomBytes(33).toString("base64url");
+        return this.config.urlId = crypto.randomBytes(33).toString("base64url");
     }
 }
