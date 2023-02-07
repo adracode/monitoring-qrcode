@@ -260,7 +260,7 @@ export class ConfigurationManager {
         if(urlId == null){
             urlId = sensor.generateUrlId();
             SensorManager.getInstance().setUrlId(sensor.getId(), urlId);
-            this.source.run(`UPDATE sensors SET urlId = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then();
+            this.source.run(`UPDATE sensors SET url_id = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then();
         }
         return urlId;
     }
