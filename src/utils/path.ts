@@ -4,6 +4,10 @@ export function getPathPage(pathPage: string){
     return path.join(__dirname, '/../public/', pathPage);
 }
 
+export function getView(view: string){
+    return path.join(__dirname, '/../views/', view);
+}
+
 export function getSQLFile(pathFile: string){
     return path.join(__dirname, '/../sql/', pathFile);
 }

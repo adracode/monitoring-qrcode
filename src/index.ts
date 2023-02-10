@@ -1,7 +1,7 @@
 import app from "./app"
 import {ConfigurationManager, SensorManager} from "./services/data-management";
 
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 
 (async () => {
     console.log("Initialisation de la connexion aux bases de données")

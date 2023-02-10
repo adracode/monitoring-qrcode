@@ -5,7 +5,7 @@ import {ConfigurationManager, SensorManager} from "../services/data-management";
 const router = express.Router();
 
 router.post("/sensors", async (req, res) => {
-    res.status(200).json({sensors: await SensorManager.getInstance().getAllSensorsId()});
+    res.status(200).json({sensors: await SensorManager.getInstance().getSensorsId()});
 });
 
 router.post("/generate", parser.json(), async (req, res) => {
@@ -15,9 +15,9 @@ router.post("/generate", parser.json(), async (req, res) => {
         return;
     }
     if(sensor.getUrlId() == null){
-        await ConfigurationManager.getInstance().generateUrlId(sensor);
+        ConfigurationManager.getInstance().generateUrlId(sensor);
     }
-    res.status(200).send({qrcodeText: `/sensor?s=${sensor.getUrlId()}`});
+    res.status(200).send({qrcodeText: `/sensors/${sensor.getUrlId()}`});
 });
 
 export default router;

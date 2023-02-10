@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <title>Données du capteur</title>
+</head>
+<body>
+<% if(sensor != null){ %>
+    <div id="sensor-name" class="box"><%= sensor %></div>
+<% } %>
+<div id="data" class="container">
+    <% for (let type of data){ %>
+        <div class="box">
+            <h4><%= type.title %></h4>
+            <h3><%= type.data %></h3>
+        </div>
+    <% } %>
+</div>
+</body>
+</html>
