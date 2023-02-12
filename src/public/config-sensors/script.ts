@@ -16,10 +16,10 @@ fetch("./get-config", {
         //@ts-ignore
         data.sensors[sensor].forEach(element => {
             const item = document.createElement('div');
-            item.appendChild(document.createTextNode(element.name))
+            item.appendChild(document.createTextNode(element.dataType))
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.checked = element.isChecked;
+            checkbox.checked = element.isDisplayed;
             item.appendChild(checkbox);
             listItem.appendChild(item);
         });

@@ -4,24 +4,29 @@ import qrcode from "./qrcode-generator";
 import configSensors from "./config-sensors"
 import configNames from "./config-names"
 //import dev from "./dev";
-import {getPathPage} from "../utils/path";
+import {getPublic} from "../utils/path";
 
 const router = express.Router();
 
-const sensorsStatic = express.static(getPathPage("sensors"), {extensions:['html'], index: "sensor.html"});
+const sensorsStatic = express.static(getPublic("sensors"), {extensions:['html'], index: "sensor.html"});
 router.use("/", sensorsStatic);
-router.use("/sensors", sensorsStatic);
-router.use("/sensors", sensors);
-router.use("/qrcode", express.static(getPathPage("qrcode"), {extensions: ['html']}));
-router.use("/qrcode", qrcode);
-router.use("/authentication", express.static(getPathPage("authentication"), {extensions: ['html']}));
-router.use("/config-sensors", express.static(getPathPage("config-sensors"), {extensions: ['html'], index: "sensors.html"}));
-router.use("/config-sensors", configSensors);
-router.use("/config-names", express.static(getPathPage("config-names"), {extensions: ['html'], index: "names.html"}));
-router.use("/config-names", configNames);
+router.use("/sensors",
+    sensorsStatic,
+    sensors);
+router.use("/qrcode",
+    express.static(getPublic("qrcode"), {extensions: ['html']}),
+    qrcode);
+router.use("/authentication",
+    express.static(getPublic("authentication"), {extensions: ['html']}));
+router.use("/config-sensors",
+    express.static(getPublic("config-sensors"), {extensions: ['html'], index: "sensors.html"}),
+    configSensors);
+router.use("/config-names",
+    express.static(getPublic("config-names"), {extensions: ['html'], index: "names.html"}),
+    configNames);
 
 
-//router.use("/dev", express.static(getPathPage("dev")))
+//router.use("/dev", express.static(getPublic("dev")))
 //router.use("/dev", dev);
 
 

@@ -62,6 +62,11 @@ export class Sensor {
     public getTitle(): string {
         return this.config.label ?? this.getId();
     }
+
+    public getRawTitle(): string | undefined {
+        return this.config.label;
+    }
+
     public getUrlId(): string | undefined {
         return this.config.urlId;
     }

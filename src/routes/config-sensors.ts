@@ -5,7 +5,7 @@ import {ConfigurationManager, SensorManager} from "../services/data-management";
 const router = express.Router();
 
 router.get("/get-config", async (req, res) => {
-    res.status(200).json({sensors: await SensorManager.getInstance().getSensors()});
+    res.status(200).json({sensors: await SensorManager.getInstance().getSensorsConfig()});
 });
 
 router.post("/set-config", parser.json(), async (req, res) => {

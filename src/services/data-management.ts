@@ -8,6 +8,16 @@ import * as fs from "fs";
 type SensorName = { name: string };
 type RawData = { [type: string]: string | number }
 type Config = { [id: string]: { label: string, fields: [{ name: string, checked: boolean }] } }
+type RawResults = {
+    results: {
+        statement_id: number,
+        series: {
+            name: string,
+            columns: string[],
+            values: (string | number)[][]
+        }[]
+    }[]
+};
 
 /**
  * Indique si l'on veut les dernières données de la base de données
@@ -141,35 +151,35 @@ export class SensorManager {
         return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
     }
 
-    public async getSensorsConfig(): Promise<{ [name: string]: { name: string, isChecked: boolean }[] }> {
-        let allData = await this.source.query<SensorName>(`SHOW FIELD KEYS`);
-        let result: { [name: string]: { name: string, isChecked: boolean }[] } = {}
-
-        //@ts-ignore
-        await Promise.all(allData.groupRows.map(async sensor => {
-            //@ts-ignore
-            let configuredTypes: string[] = await ConfigurationManager.getInstance().getTypesBySensorId(sensor.name);
-            //@ts-ignore
-            let fields: { name: string, isChecked: boolean }[] = sensor.rows.map(field => {
-                //@ts-ignore
-                let fieldName = field.fieldKey;
-                if (configuredTypes.includes(fieldName)) {
-                    return {name: field.fieldKey, isChecked: true};
-                } else {
-                    return {name: field.fieldKey, isChecked: false};
-                }
+    /**
+     * Renvoie un dictionnaire contenant les noms des capteurs avec les types de données qu'ils affichent.
+     */
+    public async getSensorsConfig(): Promise<{ [sensorId: string]: { dataType: string, isDisplayed: boolean }[] }> {
+        let tables = (await this.source.queryRaw(`SHOW FIELD KEYS`) as RawResults).results[0].series;
+        const typesBySensor = (await ConfigurationManager.getInstance().getTypesBySensorId(tables.map(sensor => sensor.name)));
+        //Conversion de la liste des tables (capteurs) en dictionnaire
+        return tables.reduce((config: { [name: string]: { dataType: string, isDisplayed: boolean }[] }, table) => {
+            const sensor = table.name;
+            const displayedTypes = typesBySensor[sensor]
+            config[sensor] = table.values.map(column => {
+                const dataType = column[0] as string;
+                return {
+                    dataType: dataType,
+                    isDisplayed: displayedTypes != null && displayedTypes.includes(dataType)
+                };
             });
-            result[sensor.name] = fields;
-        }));
-        return result;
+            return config;
+        }, {});
     }
 
-    public async updateSensors() {
-        for (let sensor of await this.getSensorsId()) {
-            this.getSensor(sensor, {updateData: false, updateConfig: true});
+    public async updateSensors(...ids: string[]) {
+        for (let sensor of ids ?? await this.getSensorsId()) {
+            this.getSensor(sensor, {updateData: false, updateConfig: true}).then();
         }
     }
 }
+
+type TypeBySensor = { sensorId: string; typesId: string };
 
 export class ConfigurationManager {
     private static instance: ConfigurationManager;
@@ -219,19 +229,38 @@ export class ConfigurationManager {
 
     private readonly source: sqlite.Database;
 
-    // private async setConfiguration(sensors: string[]) {
-    //     let manager = SensorManager.getInstance();
-    //     const insert = await this.source.prepare("UPDATE sensors SET url_id = ? WHERE sensor_id = ?");
-    //     for (const sensor of sensors) {
-    //         let urlId = (await manager.getSensor(sensor, {updateData: false, updateConfig: false}))?.getUrlId();
-    //         if(urlId != null){
-    //             await insert.run(urlId, sensor);
-    //         }
-    //     }
-    //     await insert.finalize();
-    // }
+    public async setConfiguration(config: {
+        sensorId: string,
+        types?: {
+            id: string,
+            set: boolean
+        }[],
+        label?: string
+    }) {
+        const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
+        const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
+        const sensor = config.sensorId;
+        if (config.label != null) {
+            const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
+            await update.run(config.label, sensor);
+        }
+        let configuredTypes = (await this.getTypesBySensorId([sensor]))[sensor];
+        for (let type of config.types ?? []) {
+            let typeId = type.id;
+            let set = type.set;
+            if (configuredTypes.includes(typeId)) {
+                if (!set) {
+                    await deleteQuery.run(sensor, typeId);
+                }
+            } else if (set) {
+                await insert.run(sensor, typeId);
+            }
+        }
+        await SensorManager.getInstance().updateSensors(sensor);
+    }
 
-    public async setConfiguration(config: Config) {
+    public async setConfigurations(config: Config) {
+        /*
         const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
         const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
@@ -250,7 +279,7 @@ export class ConfigurationManager {
                 }
             }
             SensorManager.getInstance().getSensor(sensor, {updateData: false, updateConfig: true});
-        }
+        }*/
     }
 
     public generateUrlId(sensor: Sensor): string | null {
@@ -299,27 +328,40 @@ export class ConfigurationManager {
         this.source?.close();
     }
 
-    public async getTypesBySensorId(sensorId: string | Sensor): Promise<string[]> {
-        const sensor = sensorId instanceof Sensor ? sensorId.getId() : sensorId;
-        let configuredTypes = (await this.source.all<{ type_id: string }[]>(
-            `SELECT type_id FROM "types_by_sensor" WHERE sensor_id= ?`, sensor)).map((sensorId: { type_id: string }) => {
-            return sensorId.type_id;
-        });
-        return configuredTypes;
+    public async getTypesBySensorId(sensorsId: string[]): Promise<{ [sensorId: string]: string[] }> {
+        if (sensorsId.length == 1) {
+            const sensor = sensorsId[0];
+            return {
+                [sensor]: (await this.source.all<{ typeId: string }[]>(
+                    `SELECT type_id AS typeId FROM "types_by_sensor" WHERE sensor_id = ?`, sensor))
+                    .map((sensorId: { typeId: string }) => sensorId.typeId)
+            };
+        } else if (sensorsId.length > 1) {
+            const typesBySensor = (await this.source.all<TypeBySensor[]>(
+                `SELECT sensor_id AS sensorId, group_concat(type_id) AS typesId FROM "types_by_sensor" GROUP BY sensor_id`))
+                .filter((sensor: TypeBySensor) => sensorsId.includes(sensor.sensorId))
+                .map((sensor: TypeBySensor) => ({...sensor, type_id: sensor.typesId.split(",")}));
+
+            return typesBySensor.reduce((acc: { [sensorId: string]: string[] }, curr) => {
+                acc[curr.sensorId] = curr.type_id;
+                return acc;
+            }, {})
+        } else {
+            return {}
+        }
+
     }
 
     public async getAllTypes(): Promise<string[]> {
-        let configuredTypes = (await this.source.all<{ type_id: string }[]>(
+        return (await this.source.all<{ type_id: string }[]>(
             `SELECT type_id FROM "types"`)).map((typeId: { type_id: string }) => {
             return typeId.type_id;
         });
-        return configuredTypes;
     }
 
     public async getFields(): Promise<{ type_id: string, label: string }[]> {
-        let configuredTypes = (await this.source.all<{ type_id: string, label: string }[]>(
+        return (await this.source.all<{ type_id: string, label: string }[]>(
             `SELECT DISTINCT types_by_sensor.type_id, label FROM "types_by_sensor" LEFT JOIN "types" ON types_by_sensor.type_id = types.type_id`));
-        return configuredTypes;
     }
 
     public async setNames(fields: { name: string, label: string }[]) {
