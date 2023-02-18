@@ -40,6 +40,7 @@ h1 {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    background-color: white;
 }
 
 menu {
@@ -65,6 +66,10 @@ li {
     cursor: pointer;
     box-sizing: border-box;
     width: 100%;
+}
+
+.input-data-type:hover label {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 3px 8px;
 }
 
 .input-data-type label::before {
@@ -103,7 +108,12 @@ li {
     width: 200px;
     align-self: center;
 }
-.form__group {
+
+.link-sensor {
+    align-self: center;
+}
+
+.form-change-label {
     position: relative;
     padding: 15px 0 0;
     margin-top: 10px;
@@ -123,9 +133,11 @@ li {
     box-sizing: border-box;
     width: 200%;
 }
+
 .change-label::placeholder {
     color: transparent;
 }
+
 .change-label:placeholder-shown ~ .change-label-label {
     font-size: 1.3rem;
     cursor: text;
@@ -148,6 +160,7 @@ li {
     border-image: linear-gradient(to right, #915cff, #c5abff);
     border-image-slice: 1;
 }
+
 .change-label:focus ~ .change-label-label {
     position: absolute;
     top: 0;
@@ -162,4 +175,217 @@ li {
 /* reset input */
 .change-label:required, .change-label:invalid {
     box-shadow: none;
+}
+
+input[type=radio] {
+    display: none;
+}
+
+#qrcodes {
+    border-top: 1px solid #cccccc;
+}
+
+.label-page {
+    display: inline-block;
+    padding: 15px 15px 25px;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    cursor: pointer;
+    font-weight: 600;
+    background-color: #efefef;
+    margin-left: -4px;
+    transition: all .5s, padding 0s, margin 0s, border 0s;
+}
+
+input:checked + .label-page {
+    padding-top: 20px;
+    border-color: #cccccc;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+    color: #0066cc;
+    background-color: #ffffff;
+}
+
+.label-page:after {
+    content: "";
+    position: relative;
+    display: block;
+    top: 10px;
+    width: 50%;
+    height: 4px;
+    background: #8d8d8d;
+    transition: all .5s, padding 0s, margin 0s, border 0s;
+}
+
+input:hover + .label-page {
+    color: #0066cc;
+}
+
+.select-page:hover + .label-page:after,
+.select-page:checked + .label-page:after {
+    background: #0066cc;
+    width: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.qr-container.selected {
+    background-color: #89e989;
+}
+
+.manage-qr {
+    position: relative;
+    cursor: pointer;
+    border: 0;
+    vertical-align: middle;
+    background-color: #efefef;
+    padding: 0;
+    width: 100%;
+    margin-bottom: 5px;
+    border-radius: 100px;
+}
+
+.manage-qr .circle {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    display: block;
+    width: 3em;
+    height: 3em;
+    background-color: #282936;
+    border-radius: 100px;
+}
+.generate-qrcode .circle {
+    background-color: #1e9300;
+}
+
+.revoke-qrcode .circle {
+    background-color: #b50000;
+}
+
+.manage-qr span.circle:before {
+    position: relative;
+    content: "";
+    display: block;
+    top: 1.5em;
+    left: 1.5em;
+    width: 0.75em;
+    height: 0.75em;
+    border-top: 0.200em solid #fff;
+    border-right: 0.200em solid #fff;
+    transform: translate(-75%, -50%) rotate(45deg);
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+.manage-qr:hover .circle .icon.arrow {
+    background: #fff;
+    transform: translate(0.5em, 0);
+}
+
+.manage-qr span.circle:after {
+    position: absolute;
+    content: "";
+    display: block;
+    top: 1.5em;
+    left: 1.2em;
+    width: 1.2em;
+    height: 0.125em;
+    transform: translate(0%, -50%);
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+.manage-qr .button-text {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    display: inline;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.manage-qr.hover span.circle:before,
+.manage-qr:hover span.circle:before {
+    transform: translate(0.5em, -50%) rotate(45deg);
+}
+
+.manage-qr.hover span.circle:after,
+.manage-qr:hover span.circle:after {
+    background-color: white;
+    transform: translate(0.5em, -50%);
+}
+
+.manage-qr.hover .circle,
+.manage-qr:hover .circle {
+    width: 100%;
+}
+
+.manage-qr.hover .button-text,
+.manage-qr:hover .button-text {
+    color: #fff;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    padding: 30px 30px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    background-color: #fefefe;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgb(0 0 0 / 20%);
+    border-top: 20px solid #d85261;
+}
+
+.confirm-title {
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 35px;
+    align-self: center;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.confirm-text {
+    text-align: center;
+    margin-bottom: 35px;
+    align-self: center;
+    box-sizing: border-box;
+}
+
+.modal-button {
+    min-width: 100px;
+    height: 35px;
+    border-radius: 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.confirm-button {
+    background: #779ecb;
+}
+
+.cancel-button {
+    background: #d85261;
+    margin-right: 10px;
 }

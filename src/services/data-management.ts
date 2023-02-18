@@ -81,8 +81,12 @@ export class SensorManager {
         }
     }
 
-    public setUrlId(sensor: string, urlId: string) {
-        this.urlIds.set(urlId, sensor);
+    public setUrlId(sensor: string | null, urlId: string) {
+        if(sensor != null) {
+            this.urlIds.set(urlId, sensor);
+        } else {
+            this.urlIds.delete(urlId);
+        }
     }
 
     /**
@@ -290,6 +294,15 @@ export class ConfigurationManager {
             this.source.run(`UPDATE sensors SET url_id = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then();
         }
         return urlId;
+    }
+
+    public revokeUrlId(sensor: Sensor) {
+        let urlId = sensor.getUrlId();
+        if (urlId != null) {
+            sensor.revokeUrlId();
+            SensorManager.getInstance().setUrlId(null, urlId);
+            this.source.run(`UPDATE sensors SET url_id = NULL WHERE sensor_id = ?`, sensor.getId()).then();
+        }
     }
 
     public async getUrlIds(): Promise<{ id: string, urlId: string }[]> {

@@ -74,4 +74,8 @@ export class Sensor {
     public generateUrlId(): string {
         return this.config.urlId = crypto.randomBytes(33).toString("base64url");
     }
+
+    public revokeUrlId() {
+        this.config.urlId = undefined;
+    }
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node build/index.js",
     "build": "tsc --project tsconfig-backend.json && tsc --project tsconfig-frontend.json && copyfiles -u 1 \"src/**/*.!(ts)\" build/",
-    "dev": "nodemon src/index.ts"
+    "dev": "ts-node src/index.ts"
   },
   "author": "LE CESNE Benjamin, LEFEBVRE Antoine",
   "dependencies": {
