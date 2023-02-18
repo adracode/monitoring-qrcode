@@ -1,39 +1,14 @@
 enum Mode {
     CONFIG,
     QRCODES,
-    PRINT
+    PRINT,
+    LABEL,
 }
 
 let mode = Mode.CONFIG;
 let loadedQRCodes = false;
 let selected: Element[] = [];
 
-for (let changeLabel of document.getElementsByClassName("change-label")) {
-    function updateLabel(event: Event) {
-        if (mode != Mode.CONFIG) {
-            return;
-        }
-        const input = event.target as HTMLInputElement;
-        if (input.value == null || input.value === "") {
-            return;
-        }
-        const identifier = input.id.split("label-")[1]
-        fetch("./config/set", {
-            method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sensorId: identifier,
-                label: input.value
-            }),
-        }).then();
-    }
-
-    changeLabel.addEventListener("keydown", (event) => {
-        if ((event as KeyboardEvent).key === "Enter") {
-            updateLabel(event);
-        }
-    });
-}
 for (let setType of document.getElementsByClassName("set-data-type")) {
     setType.addEventListener("click", (event) => {
         if (mode != Mode.CONFIG) {
@@ -72,11 +47,11 @@ const dynamic: {
     }
 } = {
     config: {
-        visibility: document.querySelectorAll(".input-data-type, .form-change-label"),
+        visibility: document.querySelectorAll("#qrcodes, .input-data-type, .form-change-label.for-qrcode"),
         onSelect: () => mode = Mode.CONFIG
     },
     qrcode: {
-        visibility: document.querySelectorAll(".qr-code-svg, .link-sensor, .generate-qrcode, .revoke-qrcode"),
+        visibility: document.querySelectorAll("#qrcodes, .qr-code-svg, .link-sensor, .generate-qrcode, .revoke-qrcode"),
         performOnElements: [{
             elements: document.querySelectorAll(".link-sensor"),
             onSelect: (element: Element) => {
@@ -105,7 +80,7 @@ const dynamic: {
         }
     },
     print: {
-        visibility: document.querySelectorAll(".qr-code-svg"),
+        visibility: document.querySelectorAll("#qrcodes, .qr-code-svg"),
         performOnElements: [{
             elements: document.querySelectorAll(".qr-container"),
             onSelect: (element) => {
@@ -127,6 +102,10 @@ const dynamic: {
             await loadQrCodes();
         }
     },
+    label: {
+        visibility: document.querySelectorAll("#labels"),
+        onSelect: () => mode = Mode.LABEL
+    }
 }
 
 for (let tab of document.getElementsByClassName("select-page")) {
@@ -229,7 +208,7 @@ function openConfirm() {
     modal.style.display = "flex";
     //document.body.style.overflow = "hidden";
     selectionRevoke.classList.add("hover");
-    modalTitle.textContent = `Confirmer la révocation (${selectionRevoke.parentElement!.id})`;
+    modalTitle.textContent = `Confirmer la révocation: ${selectionRevoke.parentElement!.id}`;
 }
 
 window.onclick = function (event) {
@@ -266,3 +245,79 @@ document.getElementById("confirm-revoke-button")!.addEventListener("click", asyn
     hide(sensor.querySelector(".revoke-qrcode")!)
     closeConfirm();
 });
+
+let labelsValue: { [id: string]: string | null } = {};
+
+for (let input of document.querySelectorAll(".change-label")) {
+    labelsValue[input.id] = input.textContent;
+    input.addEventListener("keydown", event => {
+        if((event as KeyboardEvent).key === "Enter") {
+            event.preventDefault()
+        }
+    });
+    input.addEventListener("input", (event) => {
+        if (!input.classList.contains("modified")) {
+            input.classList.add("modified")
+        }
+        if (input.classList.contains("validated")) {
+            input.classList.remove("validated")
+        }
+        if ((input as HTMLTextAreaElement).value === labelsValue[input.id]) {
+            input.classList.remove("modified")
+        }
+    });
+    input.addEventListener("focus", event => {
+        input.classList.remove("modified", "validated")
+    });
+    input.addEventListener("blur", event => {
+        if (input.classList.contains("modified")) {
+            (input as HTMLTextAreaElement).value = labelsValue[input.id]!;
+        }
+    });
+}
+
+for (let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode > .change-label")) {
+    changeLabel.addEventListener("keydown", async (event) => {
+        if ((event as KeyboardEvent).key === "Enter") {
+            if (mode != Mode.CONFIG || !changeLabel.classList.contains("modified")) {
+                return;
+            }
+            const input = event.target as HTMLTextAreaElement;
+            const identifier = input.id.split("label-")[1]
+            input.classList.remove("modified")
+            await fetch("./config/set", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sensorId: identifier,
+                    label: input.value
+                }),
+            });
+            labelsValue[input.id] = input.value;
+            input.classList.add("validated");
+        }
+    });
+}
+
+for (let changeLabel of document.querySelectorAll(".form-change-label.for-type > .change-label")) {
+    changeLabel.addEventListener("keydown", async (event) => {
+        if ((event as KeyboardEvent).key === "Enter") {
+            if (mode != Mode.LABEL || !changeLabel.classList.contains("modified")) {
+                return;
+            }
+            const input = event.target as HTMLInputElement;
+            const identifier = input.id.split("label-")[1]
+            input.classList.remove("modified")
+            await fetch("./config/set-label", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    typeId: identifier,
+                    label: input.value == null || input.value === "" ? null : input.value
+                }),
+            })
+            labelsValue[input.id] = input.value;
+            input.classList.add("validated");
+        }
+    });
+}

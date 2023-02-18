@@ -82,7 +82,7 @@ export class SensorManager {
     }
 
     public setUrlId(sensor: string | null, urlId: string) {
-        if(sensor != null) {
+        if (sensor != null) {
             this.urlIds.set(urlId, sensor);
         } else {
             this.urlIds.delete(urlId);
@@ -176,8 +176,18 @@ export class SensorManager {
         }, {});
     }
 
+    public async getAllDataTypes(): Promise<string[]> {
+        return (await this.source.query<{ fieldKey: string }>(`SHOW FIELD KEYS`))
+            .reduce((acc: string[], cur) => {
+                if (!acc.includes(cur.fieldKey)) {
+                    acc.push(cur.fieldKey);
+                }
+                return acc;
+            }, []);
+    }
+
     public async updateSensors(...ids: string[]) {
-        for (let sensor of ids ?? await this.getSensorsId()) {
+        for (let sensor of ids.length == 0 ? await this.getSensorsId() : ids) {
             this.getSensor(sensor, {updateData: false, updateConfig: true}).then();
         }
     }
@@ -239,7 +249,7 @@ export class ConfigurationManager {
             id: string,
             set: boolean
         }[],
-        label?: string
+        label?: string | null
     }) {
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
         const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
@@ -365,31 +375,50 @@ export class ConfigurationManager {
 
     }
 
-    public async getAllTypes(): Promise<string[]> {
-        return (await this.source.all<{ type_id: string }[]>(
-            `SELECT type_id FROM "types"`)).map((typeId: { type_id: string }) => {
-            return typeId.type_id;
-        });
-    }
-
-    public async getFields(): Promise<{ type_id: string, label: string }[]> {
-        return (await this.source.all<{ type_id: string, label: string }[]>(
-            `SELECT DISTINCT types_by_sensor.type_id, label FROM "types_by_sensor" LEFT JOIN "types" ON types_by_sensor.type_id = types.type_id`));
-    }
-
-    public async setNames(fields: { name: string, label: string }[]) {
-        const update = await this.source.prepare("UPDATE types SET label = ? WHERE type_id = ?");
-        const insert = await this.source.prepare("INSERT INTO types (type_id, label) VALUES (?, ?)");
-
-        for (let field of fields) {
-            let configuredTypes = await this.getAllTypes();
-            if (configuredTypes.includes(field.name)) {
-                await update.run(field.label, field.name);
-            } else {
-                await insert.run(field.name, field.label);
+    /**
+     * Renvoie tous les types de données avec leurs labels présents dans la configuration.
+     * @param ids Filtrer les types retournés, seuls les ids présents dans ce tableau sont renvoyés avec leur label.
+     * @param includeArgument Inclure dans le résultat les ids passés en argument, le résultat pourra contenir des labels nuls.
+     */
+    public async getLabelledDataTypes(ids?: string[], includeArgument?: boolean): Promise<{ id: string, label: string | null }[]> {
+        if (ids != null && ids.length == 1) {
+            return (await this.source.all<{ id: string, label: string | null }[]>(
+                `SELECT type_id AS id, label FROM "types" WHERE type_id = ?`, [ids[0]]));
+        }
+        let labeledTypes = (await this.source.all<{ id: string, label: string | null }[]>(
+            `SELECT type_id AS id, label FROM "types"`));
+        if (ids != null) {
+            labeledTypes = labeledTypes.filter(type => ids.includes(type.id));
+            if (includeArgument) {
+                for (let id of ids) {
+                    if (labeledTypes.find(type => type.id === id) == null) {
+                        labeledTypes.push({id: id, label: null});
+                    }
+                }
             }
         }
-        SensorManager.getInstance().updateSensors();
+        return labeledTypes;
+    }
+
+    public async setLabelTypes(types: { id: string, label: string | null }[]) {
+        const update = await this.source.prepare("UPDATE types SET label = ? WHERE type_id = ?");
+        const insert = await this.source.prepare("INSERT INTO types (type_id, label) VALUES (?, ?)");
+        const remove = await this.source.prepare("DELETE FROM types WHERE type_id = ?");
+
+        let configuredTypes = (await this.getLabelledDataTypes(types.map(type => type.id), false))
+            .map(labelledType => labelledType.id);
+        for (let field of types) {
+            if (configuredTypes.includes(field.id)) {
+                if (field.label == null) {
+                    await remove.run(field.id);
+                } else {
+                    await update.run(field.label, field.id);
+                }
+            } else if (field.label != null) {
+                await insert.run(field.id, field.label);
+            }
+        }
+        SensorManager.getInstance().updateSensors().then();
     }
 
 }

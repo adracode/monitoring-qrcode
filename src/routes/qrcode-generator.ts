@@ -13,14 +13,12 @@ router.get("/config", async (req, res) => {
     res.status(200).render(getView("config"),
         {
             sensors: await Promise.all((await sensors.getSensors({updateData: false}))
-                .map(async sensor => {
-                    const url = sensor.getUrlId();
-                    return {
-                        name: sensor.getId(),
-                        label: sensor.getRawTitle(),
-                        types: config[sensor.getId()]
-                    }
-                }))
+                .map(async sensor => ({
+                    name: sensor.getId(),
+                    label: sensor.getRawTitle(),
+                    types: config[sensor.getId()]
+                }))),
+            labels: await configurations.getLabelledDataTypes(await sensors.getAllDataTypes(), true)
         })
 });
 
@@ -48,7 +46,7 @@ router.post("/config/set", parser.json(), async (req, res) => {
         sensorId: string,
         typeId?: string,
         set?: boolean,
-        label?: string
+        label?: string | null
     } = req.body
     await ConfigurationManager.getInstance().setConfiguration({
         sensorId: data.sensorId,
@@ -56,7 +54,19 @@ router.post("/config/set", parser.json(), async (req, res) => {
         label: data.label
     });
     res.status(200).send();
-})
+});
+
+router.post("/config/set-label", parser.json(), async (req, res) => {
+    const data: {
+        typeId: string,
+        label?: string
+    } = req.body;
+    await ConfigurationManager.getInstance().setLabelTypes([{
+        id: data.typeId,
+        label: data.label ?? null
+    }]);
+    res.status(200).send();
+});
 
 router.post("/sensors", async (req, res) => {
     res.status(200).json({sensors: await SensorManager.getInstance().getSensorsId()});

@@ -36,7 +36,7 @@ h1 {
     top: -3px;
 }
 
-#qrcodes {
+.main {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -120,6 +120,11 @@ li {
     width: 50%;
 }
 
+.form-change-label.for-type > .change-label {
+    min-width: 200px;
+    min-height: 100px;
+}
+
 .change-label {
     font-family: inherit;
     border: 0;
@@ -157,7 +162,17 @@ li {
 .change-label:focus {
     padding-bottom: 6px;
     border-bottom: 3px solid;
-    border-image: linear-gradient(to right, #915cff, #c5abff);
+    border-image: linear-gradient(to right, #7f41ff, #c5abff);
+    border-image-slice: 1;
+}
+
+.change-label:focus.modified {
+    border-image: linear-gradient(to right, #ff0000, #ffabab);
+    border-image-slice: 1;
+}
+
+.change-label.validated {
+    border-image: linear-gradient(to right, #05cb00, #b3ffab);
     border-image-slice: 1;
 }
 
@@ -228,7 +243,7 @@ input:hover + .label-page {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .clickable {

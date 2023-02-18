@@ -20,16 +20,19 @@
     <label for="select-print" class="label-page">
         Imprimer
     </label>
+    <input type="radio" id="select-label" class="select-page" name="select" value="3">
+    <label for="select-label" class="label-page">
+        Labels
+    </label>
 </div>
-<div id="qrcodes">
+<div id="qrcodes" class="main">
     <% for(let sensor of sensors){ %>
         <div id="<%= sensor.name %>" class="qr-container">
             <h3><%= sensor.name %></h3>
-            <div class="form-change-label field">
-                <input type="text" class="change-label" placeholder="Label" name="label-<%= sensor.name %>"
+            <div class="form-change-label for-qrcode">
+                <textarea rows=1 wrap="hard" class="change-label" placeholder="Label" name="label-<%= sensor.name %>"
                         <% if(sensor.label != null) %>
-                       value="<%= sensor.label %>"
-                       id="label-<%= sensor.name %>"/>
+                          id="label-<%= sensor.name %>"><%= sensor.label %></textarea>
                 <label for="label-<%= sensor.name %>" class="change-label-label">Label</label>
             </div>
             <a href="<%= sensor.link ?? "" %>" class="link-sensor hidden">Lien vers le capteur</a>
@@ -60,14 +63,26 @@
             </button>
         </div>
     <% } %>
-    <div id="confirm-revoke" class="modal">
-        <div class="modal-content">
-            <span id="confirm-revocation-title" class="confirm-title">Confirmer la révocation</span>
-            <span class="confirm-text">Révoquer un QRCode rendra obsolète tous les QRCodes imprimés !</span>
-            <div>
-                <button id="cancel-revoke-button" class="cancel-button modal-button">Annuler</button>
-                <button id="confirm-revoke-button" class="confirm-button modal-button">Confirmer</button>
+</div>
+<div id="labels" class="main hidden">
+    <% for(let label of labels){ %>
+        <div class="qr-container">
+            <h3><%= label.id %></h3>
+            <div class="form-change-label for-type">
+                <textarea rows=1 class="change-label" placeholder="Label" name="label-<%= label.id %>"
+                          id="label-<%= label.id %>"><%= label.label %></textarea>
+                <label for="label-<%= label.id %>" class="change-label-label">Label</label>
             </div>
+        </div>
+    <% } %>
+</div>
+<div id="confirm-revoke" class="modal">
+    <div class="modal-content">
+        <span id="confirm-revocation-title" class="confirm-title">Confirmer la révocation</span>
+        <span class="confirm-text">Révoquer un QRCode rendra obsolète tous les QRCodes imprimés !</span>
+        <div>
+            <button id="cancel-revoke-button" class="cancel-button modal-button">Annuler</button>
+            <button id="confirm-revoke-button" class="confirm-button modal-button">Confirmer</button>
         </div>
     </div>
 </div>
