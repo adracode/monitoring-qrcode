@@ -33,7 +33,7 @@ router.get("/config/get-qrcodes", async (req, res) => {
                 qrcode:
                     `data:image/svg+xml;base64,${Buffer.from(await toString(create(
                         `/sensors/${urlId}`
-                    ).segments, {type: "svg"})).toString("base64")}`,
+                    ).segments, {type: "svg", margin: 2})).toString("base64")}`,
                 link: `/sensors/${urlId!}`
             }
         }

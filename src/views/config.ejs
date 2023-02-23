@@ -25,64 +25,74 @@
         Labels
     </label>
 </div>
-<div id="qrcodes" class="main">
-    <% for(let sensor of sensors){ %>
-        <div id="<%= sensor.name %>" class="qr-container">
-            <h3><%= sensor.name %></h3>
-            <div class="form-change-label for-qrcode">
+<div class="main">
+    <div id="qrcodes" class="container center">
+        <% for(let sensor of sensors){ %>
+            <div id="<%= sensor.name %>" class="qr-container">
+                <h3><%= sensor.name %></h3>
+                <div class="form-change-label for-qrcode">
                 <textarea rows=1 wrap="hard" class="change-label" placeholder="Label" name="label-<%= sensor.name %>"
                         <% if(sensor.label != null) %>
                           id="label-<%= sensor.name %>"><%= sensor.label %></textarea>
-                <label for="label-<%= sensor.name %>" class="change-label-label">Label</label>
-            </div>
-            <a href="<%= sensor.link ?? "" %>" class="link-sensor hidden">Lien vers le capteur</a>
-            <img id="code-<%= sensor.name %>" class="qr-code-svg hidden" src="" alt=""/>
-            <% for(let type of sensor.types){ %>
-                <div class="input-data-type">
-                    <input type="checkbox" name="checkbox" class="set-data-type"
-                           id="<%= `${sensor.name}:${type.dataType}` %>"
-                    <% if(type.isDisplayed){ %>
-                           checked
-                            <% } %>
-                    />
-                    <label for="<%= `${sensor.name}:${type.dataType}` %>"
-                           class="type-choice"><%= type.dataType %></label>
+                    <label for="label-<%= sensor.name %>" class="change-label-label">Label</label>
                 </div>
-            <% } %>
-            <button class="manage-qr generate-qrcode hidden">
+                <a href="<%= sensor.link ?? "" %>" class="link-sensor hidden">Lien vers le capteur</a>
+                <img id="code-<%= sensor.name %>" class="qr-code-svg hidden" src="" alt=""/>
+                <% for(let type of sensor.types){ %>
+                    <div class="input-data-type">
+                        <input type="checkbox" name="checkbox" class="set-data-type"
+                               id="<%= `${sensor.name}:${type.dataType}` %>"
+                        <% if(type.isDisplayed){ %>
+                               checked
+                                <% } %>
+                        />
+                        <label for="<%= `${sensor.name}:${type.dataType}` %>"
+                               class="type-choice"><%= type.dataType %></label>
+                    </div>
+                <% } %>
+                <button class="button-slider generate-qrcode hidden">
                 <span class="circle" aria-hidden="true">
                     <span class="icon arrow"></span>
                 </span>
-                <span class="button-text">Générer</span>
-            </button>
-            <button class="manage-qr revoke-qrcode hidden">
+                    <span class="button-text">Générer</span>
+                </button>
+                <button class="button-slider revoke-qrcode hidden">
                 <span class="circle" aria-hidden="true">
                     <span class="icon arrow"></span>
                 </span>
-                <span class="button-text">Révoquer</span>
-            </button>
-        </div>
-    <% } %>
-</div>
-<div id="labels" class="main hidden">
-    <% for(let label of labels){ %>
-        <div class="qr-container">
-            <h3><%= label.id %></h3>
-            <div class="form-change-label for-type">
+                    <span class="button-text">Révoquer</span>
+                </button>
+            </div>
+        <% } %>
+    </div>
+    <div id="labels" class="container center hidden">
+        <% for(let label of labels){ %>
+            <div class="qr-container">
+                <h3><%= label.id %></h3>
+                <div class="form-change-label for-type">
                 <textarea rows=1 class="change-label" placeholder="Label" name="label-<%= label.id %>"
                           id="label-<%= label.id %>"><%= label.label %></textarea>
-                <label for="label-<%= label.id %>" class="change-label-label">Label</label>
+                    <label for="label-<%= label.id %>" class="change-label-label">Label</label>
+                </div>
             </div>
-        </div>
-    <% } %>
-</div>
-<div id="confirm-revoke" class="modal">
-    <div class="modal-content">
-        <span id="confirm-revocation-title" class="confirm-title">Confirmer la révocation</span>
-        <span class="confirm-text">Révoquer un QRCode rendra obsolète tous les QRCodes imprimés !</span>
-        <div>
-            <button id="cancel-revoke-button" class="cancel-button modal-button">Annuler</button>
-            <button id="confirm-revoke-button" class="confirm-button modal-button">Confirmer</button>
+        <% } %>
+    </div>
+    <div class="container center">
+        <button class="button-slider print-qrcodes hidden">
+                <span class="circle" aria-hidden="true">
+                    <span class="icon arrow"></span>
+                </span>
+            <span class="button-text">Imprimer</span>
+        </button>
+    </div>
+    <div id="confirm-revoke" class="modal">
+        <div class="modal-content">
+            <span id="confirm-revocation-title" class="confirm-title">Confirmer la révocation</span>
+            <span class="confirm-text">Révoquer un QRCode rendra obsolète tous les QRCodes imprimés !</span>
+            <div>
+                <button id="cancel-revoke-button" class="cancel-button modal-button">Annuler</button>
+                <button id="confirm-revoke-button" class="confirm-button modal-button">Confirmer</button>
+            </div>
         </div>
     </div>
 </div>

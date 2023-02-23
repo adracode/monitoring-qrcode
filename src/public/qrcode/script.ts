@@ -80,7 +80,7 @@ const dynamic: {
         }
     },
     print: {
-        visibility: document.querySelectorAll("#qrcodes, .qr-code-svg"),
+        visibility: document.querySelectorAll("#qrcodes, .qr-code-svg, .print-qrcodes"),
         performOnElements: [{
             elements: document.querySelectorAll(".qr-container"),
             onSelect: (element) => {
@@ -251,7 +251,7 @@ let labelsValue: { [id: string]: string | null } = {};
 for (let input of document.querySelectorAll(".change-label")) {
     labelsValue[input.id] = input.textContent;
     input.addEventListener("keydown", event => {
-        if((event as KeyboardEvent).key === "Enter") {
+        if ((event as KeyboardEvent).key === "Enter") {
             event.preventDefault()
         }
     });
@@ -320,4 +320,38 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
             input.classList.add("validated");
         }
     });
+}
+
+for(let printButton of document.querySelectorAll(".print-qrcodes")){
+    printButton.addEventListener("click", (event) => {
+        let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({title: img.parentElement.id, img: img})));
+        window.print();
+        printed.remove();
+    });
+}
+
+function initPrint(qrcodes: {title: string, img: HTMLImageElement}[]): HTMLDivElement {
+    let chunks: {title: string, img: HTMLImageElement}[][] = []
+    for (let i = 0; i < qrcodes.length; i += 6) {
+        chunks.push(qrcodes.slice(i, i + 6));
+    }
+    const allPages = document.createElement("div");
+    allPages.classList.add("print");
+    for (const chunk of chunks) {
+        const page = document.createElement("div");
+        page.classList.add("page");
+        allPages.appendChild(page);
+        for(const [index, qrcode] of chunk.entries()){
+            const clone = qrcode.img.cloneNode() as HTMLImageElement;
+            const qrcodeDiv = document.createElement("div");
+            qrcodeDiv.classList.add(`img-${index}`, "qrcode-img-container");
+            const title = document.createElement("p");
+            title.textContent = qrcode.title;
+            qrcodeDiv.appendChild(title)
+            qrcodeDiv.appendChild(clone)
+            page.appendChild(qrcodeDiv);
+        }
+    }
+    document.body.appendChild(allPages)
+    return allPages;
 }
