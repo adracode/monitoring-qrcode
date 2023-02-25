@@ -6,7 +6,10 @@ import {getSQLFile} from "../utils/path"
 import * as fs from "fs";
 
 type SensorName = { name: string };
-type RawData = { [type: string]: string | number }
+type RawData = {
+    time?: { getNanoTime: () => number },
+    [type: string]: any
+}
 type Config = { [id: string]: { label: string, fields: [{ name: string, checked: boolean }] } }
 type RawResults = {
     results: {
@@ -14,7 +17,7 @@ type RawResults = {
         series: {
             name: string,
             columns: string[],
-            values: (string | number)[][]
+            values: any[][]
         }[]
     }[]
 };
@@ -112,7 +115,8 @@ export class SensorManager {
         id = SensorManager.sanitize(id);
         let sensor: Sensor = this.sensors.get(id) ?? new Sensor(id);
         if (options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
-            sensor.setData(await this.getDatabaseSensorData(id));
+            const data = (await this.getDatabaseSensorData(id));
+            sensor.setData(data.dateOfData, data.data);
             if (sensor.isEmpty()) {
                 return null;
             }
@@ -136,13 +140,17 @@ export class SensorManager {
      * @param id L'ID du capteur
      * @private
      */
-    private async getDatabaseSensorData(id: string): Promise<SensorsData> {
-        return Object.entries((await this.source.query<RawData>(
+    private async getDatabaseSensorData(id: string): Promise<{ dateOfData: number, data: SensorsData }> {
+        const rawData = (await this.source.query<RawData>(
             `SELECT * FROM "${SensorManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
-        )).at(0) ?? {}).map(([dataType, data]) => ({
-            type: dataType,
-            value: data
-        }));
+        )).at(0) ?? {};
+        return {
+            dateOfData: Math.floor((rawData.time?.getNanoTime() ?? 0) / 1_000_000),
+            data: Object.entries(rawData).map(([dataType, data]) => ({
+                type: dataType,
+                value: data
+            }))
+        };
     }
 
     /**

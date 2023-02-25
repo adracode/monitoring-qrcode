@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-export type SensorData = { type: string, value: string | number };
+export type SensorData = { type: string, value: any };
 export type SensorsData = SensorData[];
 export type TypesLabel = { [type: string]: string };
 export type ConfigurationSensor = Partial<{
@@ -11,9 +11,11 @@ export type ConfigurationSensor = Partial<{
 
 export class Sensor {
     private static readonly UPDATE_INTERVAL = 10 * 60 * 1_000;
+    private static readonly EXPIRED_INTERVAL = 30 * 60 * 1_000;
 
     private readonly id: string;
-    private lastUpdate: number = 0;
+    private lastDatabaseUpdate: number = 0;
+    private dateOfData: number = 0;
     private data: SensorsData = [];
     private config: ConfigurationSensor = {}
 
@@ -22,22 +24,26 @@ export class Sensor {
     }
 
     public needUpdate(): boolean {
-        return this.lastUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
+        return this.lastDatabaseUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
     }
 
     public setConfiguration(config: ConfigurationSensor) {
         this.config = config;
-        if(config.label == ""){
+        if (config.label == "") {
             this.config.label = undefined;
         }
     }
 
-    public setData(data: SensorsData) {
-        this.lastUpdate = Date.now();
+    public setData(dateOfData: number, data: SensorsData) {
+        this.lastDatabaseUpdate = Date.now();
+        this.dateOfData = dateOfData;
         this.data = data;
     }
 
     public get(type?: string[]): SensorsData {
+        if(this.isExpired()){
+            return [];
+        }
         const types = type ?? Object.keys(this.config.type ?? {});
         return this.data
             .filter((data: SensorData) => types.includes(data.type))
@@ -45,6 +51,10 @@ export class Sensor {
                 ...data,
                 type: this.config.type?.[data.type] ?? data.type
             }));
+    }
+
+    public isExpired(): boolean {
+        return this.dateOfData < Date.now() - Sensor.EXPIRED_INTERVAL;
     }
 
     public isEmpty(): boolean {

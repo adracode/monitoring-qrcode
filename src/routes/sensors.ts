@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/:sensor", async (req, res) => {
     let sensor: string = req.params.sensor;
     SensorManager.getInstance().getSensorFromURL(sensor).then(async sensor => {
-        function sendData(title: string, data: { title: string, data: number | string }[] ) {
+        function sendData(title: string, data: { title: string, data: any }[] ) {
             res.status(200).render(getView("data"), {sensor: title, data: data});
         }
 
@@ -34,7 +34,7 @@ router.get("/:sensor", async (req, res) => {
                 formatted = `${data.type}: ${data.value}`;
             }
             const titleAndData = formatted.split(":");
-            return {title: titleAndData[0], data: titleAndData[1]}
+            return {title: titleAndData[0], data: data.value == null ? "Indisponible" : titleAndData[1]}
         }));
     });
 });
