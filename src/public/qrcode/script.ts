@@ -10,7 +10,7 @@ let loadedQRCodes = false;
 let selected: Element[] = [];
 
 for (let setType of document.getElementsByClassName("set-data-type")) {
-    setType.addEventListener("click", (event) => {
+    setType.addEventListener("click", async (event) => {
         if (mode != Mode.CONFIG) {
             return;
         }
@@ -20,7 +20,8 @@ for (let setType of document.getElementsByClassName("set-data-type")) {
             console.error("Le type de données n'a pas pu être identifié, merci de recharger la page");
             return;
         }
-        fetch("./config/set", {
+        (setType as HTMLInputElement).disabled = true;
+        await fetch("./config/set", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -28,7 +29,8 @@ for (let setType of document.getElementsByClassName("set-data-type")) {
                 typeId: identifier[1],
                 set: checkBox.checked
             }),
-        }).then();
+        });
+        (setType as HTMLInputElement).disabled = false;
     })
 }
 const hide = (element: Element) => element.classList.add("hidden");
@@ -172,25 +174,25 @@ for (let container of document.getElementsByClassName("qr-container")) {
 }
 
 for (let generate of document.getElementsByClassName("generate-qrcode")) {
-    generate.addEventListener("click", () => {
+    generate.addEventListener("click", async () => {
         const sensor = generate.parentElement!;
-        fetch("./config/generate", {
+        const res = await fetch("./config/generate", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({sensor: sensor.id})
-        }).then(async (res) => {
-            let qrCode: { qrcode: string, link: string } = await res.json();
-            const image: HTMLImageElement = sensor.querySelector(".qr-code-svg")!;
-            image.src = qrCode.qrcode;
-            const link: HTMLLinkElement = sensor.querySelector(".link-sensor")!;
-            link.href = qrCode.link;
-            show(image);
-            show(link);
-            hide(sensor.querySelector(".generate-qrcode")!)
-            show(sensor.querySelector(".revoke-qrcode")!)
         })
+        let qrCode: { qrcode: string, link: string } = await res.json();
+        const image: HTMLImageElement = sensor.querySelector(".qr-code-svg")!;
+        image.src = qrCode.qrcode;
+        const link: HTMLLinkElement = sensor.querySelector(".link-sensor")!;
+        link.href = qrCode.link;
+        show(image);
+        show(link);
+        hide(sensor.querySelector(".generate-qrcode")!)
+        show(sensor.querySelector(".revoke-qrcode")!)
+
     });
 }
 
@@ -228,6 +230,7 @@ for (let revoke of document.getElementsByClassName("revoke-qrcode")) {
 document.getElementById("cancel-revoke-button")!.addEventListener("click", closeConfirm);
 document.getElementById("confirm-revoke-button")!.addEventListener("click", async event => {
     const sensor = selectionRevoke.parentElement!;
+    (event.target as HTMLButtonElement).disabled = true
     await fetch("./config/revoke", {
         method: 'DELETE',
         headers: {
@@ -235,6 +238,7 @@ document.getElementById("confirm-revoke-button")!.addEventListener("click", asyn
         },
         body: JSON.stringify({sensor: sensor.id})
     });
+    (event.target as HTMLButtonElement).disabled = false;
     const image: HTMLImageElement = sensor.querySelector(".qr-code-svg")!;
     image.src = "";
     const link: HTMLLinkElement = sensor.querySelector(".link-sensor")!;
@@ -322,16 +326,19 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
     });
 }
 
-for(let printButton of document.querySelectorAll(".print-qrcodes")){
+for (let printButton of document.querySelectorAll(".print-qrcodes")) {
     printButton.addEventListener("click", (event) => {
-        let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({title: img.parentElement.id, img: img})));
+        let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({
+            title: img.parentElement.id,
+            img: img
+        })));
         window.print();
         printed.remove();
     });
 }
 
-function initPrint(qrcodes: {title: string, img: HTMLImageElement}[]): HTMLDivElement {
-    let chunks: {title: string, img: HTMLImageElement}[][] = []
+function initPrint(qrcodes: { title: string, img: HTMLImageElement }[]): HTMLDivElement {
+    let chunks: { title: string, img: HTMLImageElement }[][] = []
     for (let i = 0; i < qrcodes.length; i += 6) {
         chunks.push(qrcodes.slice(i, i + 6));
     }
@@ -341,7 +348,7 @@ function initPrint(qrcodes: {title: string, img: HTMLImageElement}[]): HTMLDivEl
         const page = document.createElement("div");
         page.classList.add("page");
         allPages.appendChild(page);
-        for(const [index, qrcode] of chunk.entries()){
+        for (const [index, qrcode] of chunk.entries()) {
             const clone = qrcode.img.cloneNode() as HTMLImageElement;
             const qrcodeDiv = document.createElement("div");
             qrcodeDiv.classList.add(`img-${index}`, "qrcode-img-container");

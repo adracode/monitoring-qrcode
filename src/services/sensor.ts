@@ -8,10 +8,15 @@ export type ConfigurationSensor = Partial<{
     type: TypesLabel,
     urlId: string
 }>;
+type SensorSetting = {
+    [id: string]: any
+}
 
 export class Sensor {
-    private static readonly UPDATE_INTERVAL = 10 * 60 * 1_000;
-    private static readonly EXPIRED_INTERVAL = 30 * 60 * 1_000;
+    private static readonly settings: SensorSetting = {
+       updateInterval: 10 * 60 * 1_000,
+       expirationTime: 30 * 60 * 1_000
+    }
 
     private readonly id: string;
     private lastDatabaseUpdate: number = 0;
@@ -24,7 +29,7 @@ export class Sensor {
     }
 
     public needUpdate(): boolean {
-        return this.lastDatabaseUpdate < Date.now() - Sensor.UPDATE_INTERVAL;
+        return this.lastDatabaseUpdate < Date.now() - Sensor.settings.updateInterval;
     }
 
     public setConfiguration(config: ConfigurationSensor) {
@@ -41,7 +46,7 @@ export class Sensor {
     }
 
     public get(type?: string[]): SensorsData {
-        if(this.isExpired()){
+        if (this.isExpired()) {
             return [];
         }
         const types = type ?? Object.keys(this.config.type ?? {});
@@ -54,7 +59,7 @@ export class Sensor {
     }
 
     public isExpired(): boolean {
-        return this.dateOfData < Date.now() - Sensor.EXPIRED_INTERVAL;
+        return this.dateOfData < Date.now() - Sensor.settings.expirationTime;
     }
 
     public isEmpty(): boolean {
@@ -87,5 +92,9 @@ export class Sensor {
 
     public revokeUrlId() {
         this.config.urlId = undefined;
+    }
+
+    public static setSetting(id: string, value: any) {
+        Sensor.settings[id] = value;
     }
 }
