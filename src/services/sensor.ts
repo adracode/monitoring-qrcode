@@ -15,7 +15,10 @@ type SensorSetting = {
 export class Sensor {
     private static readonly settings: SensorSetting = {
        updateInterval: 10 * 60 * 1_000,
-       expirationTime: 30 * 60 * 1_000
+       expirationTime: 30 * 60 * 1_000,
+       tokenExpirationTime: 30 * 60 * 1_000,
+       deleteTokenInterval: 60 * 60 * 24 * 1_000,
+       adminPassword: undefined
     }
 
     private readonly id: string;
@@ -96,5 +99,9 @@ export class Sensor {
 
     public static setSetting(id: string, value: any) {
         Sensor.settings[id] = value;
+    }
+
+    public static getSetting<T>(id: string) : T {
+        return Sensor.settings[id] as T;
     }
 }
