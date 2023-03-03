@@ -21,7 +21,7 @@ for (let setType of document.getElementsByClassName("set-data-type")) {
             return;
         }
         (setType as HTMLInputElement).disabled = true;
-        await fetch("./config/set", {
+        await fetch("./set", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -146,7 +146,7 @@ function hasURL(qrContainer: Element): boolean {
 async function loadQrCodes() {
     if (!loadedQRCodes) {
         loadedQRCodes = true;
-        const res = await fetch("./config/get-qrcodes", {
+        const res = await fetch("./get-qrcodes", {
             method: "GET"
         });
         let qrCodes: { [id: string]: { qrcode: string, link: string } } = await res.json();
@@ -176,7 +176,7 @@ for (let container of document.getElementsByClassName("qr-container")) {
 for (let generate of document.getElementsByClassName("generate-qrcode")) {
     generate.addEventListener("click", async () => {
         const sensor = generate.parentElement!;
-        const res = await fetch("./config/generate", {
+        const res = await fetch("./generate", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -231,7 +231,7 @@ document.getElementById("cancel-revoke-button")!.addEventListener("click", close
 document.getElementById("confirm-revoke-button")!.addEventListener("click", async event => {
     const sensor = selectionRevoke.parentElement!;
     (event.target as HTMLButtonElement).disabled = true
-    await fetch("./config/revoke", {
+    await fetch("./revoke", {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -289,7 +289,7 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode
             const input = event.target as HTMLTextAreaElement;
             const identifier = input.id.split("label-")[1]
             input.classList.remove("modified")
-            await fetch("./config/set", {
+            await fetch("./set", {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -312,7 +312,7 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
             const input = event.target as HTMLInputElement;
             const identifier = input.id.split("label-")[1]
             input.classList.remove("modified")
-            await fetch("./config/set-label", {
+            await fetch("./set-label", {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

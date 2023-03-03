@@ -1,12 +1,8 @@
-import express from "express";
-import parser from "body-parser";
-import { Sensor } from "../services/sensor";
+import express, { NextFunction } from "express";
 import { TokenManager } from "../services/token";
+import { Sensor } from "../services/sensor";
 
-const router = express.Router();
-
-router.post("/admin", parser.json(), async (req, res) => {
-    console.log(req.body)
+module.exports = async (req: express.Request, res: express.Response, next: NextFunction) => {
     var crypto = require('crypto');
     const hash = crypto.createHash('sha256').update(req.body?.password).digest('hex');
     const hashPassword = Sensor.getSetting<string>("adminPassword")?.toLowerCase();
@@ -24,7 +20,4 @@ router.post("/admin", parser.json(), async (req, res) => {
         return;
     }
     res.status(401).json();
-});
-
-
-export default router;
+};

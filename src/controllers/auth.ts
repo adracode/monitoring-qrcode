@@ -12,5 +12,5 @@ module.exports = (req: express.Request, res: express.Response, next: NextFunctio
             return;
         }
     }
-    res.redirect("/authentication")
+    res.redirect("/login")
 };
