@@ -44,7 +44,7 @@ export class TokenManager {
 
     public deleteInvalidToken(){
         for (const token of this.tokens.keys()) {
-            if(!this.isValid(token)){
+            if(Date.now() > this.tokens.get(token)!){
                 this.deleteToken(token);
             }
         }
