@@ -1,16 +1,12 @@
 import express, { NextFunction } from "express";
-import { TokenManager } from "../services/token";
+import { getAuthCookie } from "../utils/cookie";
 
-module.exports = (req: express.Request, res: express.Response, next: NextFunction) => {
-    const cookies = req.headers.cookie?.trim().split(';')
-    for (const cookie of cookies??[]) {
-        const tmp = cookie.trim().split('=');
-        const cookieName = tmp[0].trim();
-        const cookieValue = tmp[1].trim();
-        if(cookieName==="authToken" && TokenManager.getInstance().isValid(cookieValue)){
-            next();
-            return;
-        }
+function verifyAuthentication(req: express.Request, res: express.Response, next: NextFunction) {
+    if(getAuthCookie(req.headers.cookie).hasAuthCookie){
+        next();
+        return;
     }
     res.redirect("/login")
 };
+
+export default verifyAuthentication;

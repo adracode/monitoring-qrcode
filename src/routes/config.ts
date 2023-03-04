@@ -18,4 +18,6 @@ router.post("/generate", parser.json(), config.slashGenerate);
 
 router.delete("/revoke", parser.json(), config.slashRevoke);
 
+router.get("/deconnect", parser.json(), config.slashDeconnect);
+
 export default router;

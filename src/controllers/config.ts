@@ -1,11 +1,14 @@
 import express, { NextFunction } from "express";
-import parser from "body-parser";
 import {
   ConfigurationManager,
   SensorManager,
 } from "../services/data-management";
 import { getView } from "../utils/path";
 import { create, toString } from "qrcode";
+import { getAuthCookie } from "../utils/cookie";
+import { TokenManager } from "../services/token";
+
+const router = express.Router();
 
 exports.slash = async (
   req: express.Request,
@@ -153,4 +156,21 @@ exports.slashRevoke = async (
   }
   ConfigurationManager.getInstance().revokeUrlId(sensor);
   res.status(200).send();
+};
+
+
+exports.slashDeconnect = async (
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction
+) => {
+  const cookie = getAuthCookie(req.headers.cookie);
+  if(cookie.hasAuthCookie){
+    TokenManager.getInstance().deleteToken(cookie.authCookie);
+  }
+  res.cookie("authToken", "", {
+      httpOnly: true,
+      sameSite: "lax"
+    });
+  res.redirect("/login");
 };
