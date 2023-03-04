@@ -1,10 +1,6 @@
 /* Définition des styles pour le body */
 body {
   font-family: Helvetica, sans-serif;
-}
-
-/* Définition des styles pour la classe "align" de la balise <body> */
-.align {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -77,7 +73,7 @@ button[type="submit"] {
 }
 
 /* Définition des styles pour le message de validation */
-#message.validated {
+#message.valid {
   color: #05cb00;
 }
 
@@ -88,19 +84,14 @@ button[type="submit"] {
 
 /* Définition des styles pour le placeholder */
 /* <--- */
-.form-change-label {
+.change-password {
   position: relative;
   padding: 15px 0 0;
   margin-top: 10px;
   width: 100%;
 }
 
-.form-change-label.for-type>.change-label {
-  min-width: 200px;
-  min-height: 100px;
-}
-
-.change-label {
+.password-input {
   font-family: inherit;
   border: 0;
   outline: 0;
@@ -113,18 +104,18 @@ button[type="submit"] {
   box-sizing: border-box;
 }
 
-.change-label::placeholder {
+.password-input::placeholder {
   color: transparent;
 }
 
-.change-label:placeholder-shown~.change-label-label {
+.password-input:placeholder-shown~.password-label {
   font-size: 1.3rem;
   cursor: text;
   top: 20px;
   margin-left: 10px;
 }
 
-.change-label-label {
+.password-label {
   position: absolute;
   top: 0;
   display: block;
@@ -133,7 +124,7 @@ button[type="submit"] {
   color: #9b9b9b;
 }
 
-.change-label:focus {
+.password-input:focus {
   padding-bottom: 6px;
   border-bottom: 3px solid;
   border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
@@ -142,15 +133,15 @@ button[type="submit"] {
   border-bottom-right-radius: 0;
 }
 
-.change-label.invalid {
+.password-input.invalid {
   border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
 }
 
-.change-label.validated {
+.password-input.valid {
   border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
 }
 
-.change-label:focus~.change-label-label {
+.password-input:focus~.password-label {
   position: absolute;
   top: 0;
   display: block;
@@ -162,8 +153,8 @@ button[type="submit"] {
 }
 
 /* reset input */
-.change-label:required,
-.change-label:invalid {
+.password-input:required,
+.password-input:invalid {
   box-shadow: none;
 }
 /* ---> */

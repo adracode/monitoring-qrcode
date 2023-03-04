@@ -1,8 +1,6 @@
-
-
 const form = document.getElementById("login-form")!;
 const message = document.getElementById("message")!;
-const input = document.getElementsByClassName("change-label")![0] as HTMLInputElement;
+const input = document.getElementsByClassName("password-input")![0] as HTMLInputElement;
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -20,8 +18,8 @@ form.addEventListener("submit", async (event) => {
       case 200:
         let responseData = await response.json();
         let authToken = responseData.authToken;
-        input.classList.add("validated");
-        message.classList.add("validated");
+        input.classList.add("valid");
+        message.classList.add("valid");
         message.innerText = "Vous êtes connecté.";
         message.classList.remove("hidden");
         // Stockage du cookie d'authentification
