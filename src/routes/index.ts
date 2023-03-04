@@ -2,11 +2,11 @@ import express from "express";
 import sensors from "./sensors";
 import config from "./config";
 import login from "./login";
+import auth from "../controllers/auth";
 //import dev from "./dev";
 import { getPublic } from "../utils/path";
 
 const router = express.Router();
-const auth = require("../controllers/auth");
 
 const sensorsStatic = express.static(getPublic("sensors"));
 

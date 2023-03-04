@@ -2,7 +2,7 @@ import express, { NextFunction } from "express";
 import { TokenManager } from "../services/token";
 import { Sensor } from "../services/sensor";
 
-module.exports = async (req: express.Request, res: express.Response, next: NextFunction) => {
+async function logIn(req: express.Request, res: express.Response, next: NextFunction) {
     var crypto = require('crypto');
     const hash = crypto.createHash('sha256').update(req.body?.password).digest('hex');
     const hashPassword = Sensor.getSetting<string>("adminPassword")?.toLowerCase();
@@ -21,3 +21,5 @@ module.exports = async (req: express.Request, res: express.Response, next: NextF
     }
     res.status(401).json();
 };
+
+export default logIn

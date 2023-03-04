@@ -1,8 +1,8 @@
-import express from "express"
+import express from "express";
+import showData from "../controllers/sensors";
 
 const router = express.Router();
-const sensors = require("../controllers/sensors")
 
-router.get("/:sensor?", sensors);
+router.get("/:sensor?", showData);
 
 export default router;

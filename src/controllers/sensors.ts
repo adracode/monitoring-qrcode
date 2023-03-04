@@ -4,7 +4,7 @@ import { format } from '../utils/string';
 import { getView } from '../utils/path';
 import { SensorsData } from '../services/sensor';
 
-module.exports = async (req: express.Request, res: express.Response, next: NextFunction) => {
+async function showData(req: express.Request, res: express.Response, next: NextFunction){
   const sensor: string = req.params.sensor;
   SensorManager.getInstance()
     .getSensorFromURL(sensor)
@@ -45,3 +45,5 @@ module.exports = async (req: express.Request, res: express.Response, next: NextF
       );
     });
 };
+
+export default showData;
