@@ -1,16 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: left;
-}
-
-#influx-response {
-    text-align: left;
-}
-
-h1 {
-    color: #333;
-    font-size: 2em;
-    margin: 0.5em 0;
+    font-family: Helvetica, sans-serif;
 }
 
 .qr-container {
@@ -18,12 +7,11 @@ h1 {
     flex-direction: column;
     box-shadow: rgba(0, 0, 0, 0.35) 0 2px 6px;
     border-radius: 10px;
-    color: #000000;
-    font-family: Helvetica, sans-serif;
     transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
     padding: 10px;
     margin: 10px;
     position: relative;
+    top: 0;
     flex: 1 1 0;
     max-width: max-content;
 }
@@ -31,34 +19,19 @@ h1 {
 .qr-container:hover {
     box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
     top: -3px;
+    transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
 }
 
 .container {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
     background-color: white;
-}
-
-.center {
     justify-content: center;
-}
-
-menu {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    width: 400px;
-}
-
-li {
-    flex-grow: 1;
 }
 
 .input-data-type label {
     display: inline-block;
     border: 2px solid rgba(0, 0, 0, 0.3);
-    color: #000000;
     border-radius: 25px;
     white-space: nowrap;
     margin: 3px 0px;
@@ -70,7 +43,7 @@ li {
 }
 
 .input-data-type:hover label {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 3px 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0 3px 8px;
 }
 
 .input-data-type label::before {
@@ -119,7 +92,6 @@ li {
     position: relative;
     padding: 15px 0 0;
     margin-top: 10px;
-    width: 50%;
 }
 
 .form-change-label.for-type > .change-label {
@@ -134,11 +106,9 @@ li {
     font-size: 1.3rem;
     padding: 7px 0 7px 10px;
     margin-bottom: 10px;
-    transition: border-color 0.2s;
     background-color: #f0f0f0;
     border-radius: 10px;
     box-sizing: border-box;
-    width: 200%;
 }
 
 .change-label::placeholder {
@@ -150,13 +120,14 @@ li {
     cursor: text;
     top: 20px;
     margin-left: 10px;
+    transition-property: top, margin-left, color, font;
+    transition-duration: 0.2s;
 }
 
 .change-label-label {
     position: absolute;
     top: 0;
     display: block;
-    transition: 0.2s;
     font-size: 1rem;
     color: #9b9b9b;
 }
@@ -164,25 +135,23 @@ li {
 .change-label:focus {
     padding-bottom: 6px;
     border-bottom: 3px solid;
-    border-image: linear-gradient(to right, #7f41ff, #c5abff);
-    border-image-slice: 1;
+    border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
+    margin-bottom: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
+
 .change-label:focus.modified {
-    border-image: linear-gradient(to right, #ff0000, #ffabab);
-    border-image-slice: 1;
+    border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
 }
 
 .change-label.validated {
-    border-image: linear-gradient(to right, #05cb00, #b3ffab);
-    border-image-slice: 1;
+    border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
 }
 
 .change-label:focus ~ .change-label-label {
-    position: absolute;
     top: 0;
-    display: block;
-    transition: 0.2s;
     font-size: 1rem;
     margin-left: 0;
     color: #915cff;

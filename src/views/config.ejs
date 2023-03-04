@@ -25,7 +25,7 @@
     </label>
 </div>
 <div class="main">
-    <div id="qrcodes" class="container center">
+    <div id="qrcodes" class="container">
         <% for(let sensor of sensors){ %>
             <div id="<%= sensor.name %>" class="qr-container">
                 <h3><%= sensor.name %></h3>
@@ -64,7 +64,7 @@
             </div>
         <% } %>
     </div>
-    <div id="labels" class="container center hidden">
+    <div id="labels" class="container hidden">
         <% for(let label of labels){ %>
             <div class="qr-container">
                 <h3><%= label.id %></h3>
@@ -76,7 +76,7 @@
             </div>
         <% } %>
     </div>
-    <div class="container center">
+    <div class="container">
         <button class="button-slider print-qrcodes hidden">
                 <span class="circle" aria-hidden="true">
                     <span class="icon arrow"></span>

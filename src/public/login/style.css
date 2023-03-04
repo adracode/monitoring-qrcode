@@ -46,7 +46,7 @@ label {
 input[type="password"] {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  /*border: 1px solid #ddd;*/
   border-radius: 5px;
   font-size: 16px;
   color: #333;
@@ -136,18 +136,18 @@ button[type="submit"] {
 .change-label:focus {
   padding-bottom: 6px;
   border-bottom: 3px solid;
-  border-image: linear-gradient(to right, #7f41ff, #c5abff);
-  border-image-slice: 1;
+  border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
+  margin-bottom: 21px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .change-label.invalid {
-  border-image: linear-gradient(to right, #ff0000, #ffabab);
-  border-image-slice: 1;
+  border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
 }
 
 .change-label.validated {
-  border-image: linear-gradient(to right, #05cb00, #b3ffab);
-  border-image-slice: 1;
+  border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
 }
 
 .change-label:focus~.change-label-label {
