@@ -20,7 +20,7 @@ router.post("/generate", parser.json(), config.slashGenerate);
 
 router.delete("/revoke", parser.json(), config.slashRevoke);
 
-router.get("/deconnect", parser.json(), config.slashDeconnect);
+router.post("/disconnect", parser.json(), config.slashDisconnect);
 
 router.get("/password", password)
 

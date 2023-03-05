@@ -159,7 +159,7 @@ exports.slashRevoke = async (
 };
 
 
-exports.slashDeconnect = async (
+exports.slashDisconnect = async (
   req: express.Request,
   res: express.Response,
   next: NextFunction
@@ -168,9 +168,9 @@ exports.slashDeconnect = async (
   if(cookie.hasAuthCookie){
     TokenManager.getInstance().deleteToken(cookie.authCookie);
   }
-  res.cookie("authToken", "", {
-      httpOnly: true,
-      sameSite: "lax"
-    });
-  res.redirect("/login");
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    sameSite: "lax"
+  });
+  res.status(302).json({url: "/login"})
 };

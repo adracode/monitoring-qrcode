@@ -326,6 +326,15 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
     });
 }
 
+for(let disconnect of document.querySelectorAll(".disconnect-button")){
+    disconnect.addEventListener("click", async (event) => {
+        let res = await fetch("./disconnect", {
+            method: "POST"
+        });
+        window.location.href = res.url;
+    });
+}
+
 for (let printButton of document.querySelectorAll(".print-qrcodes")) {
     printButton.addEventListener("click", (event) => {
         let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({
