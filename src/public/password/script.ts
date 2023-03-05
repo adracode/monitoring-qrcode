@@ -1,13 +1,15 @@
 {
+  const form = document.getElementById("login-form")!;
+
   const message = document.getElementById("message")!;
   const input = document.getElementsByClassName("password-input")![0] as HTMLInputElement;
 
-  document.getElementById("login-form")!.addEventListener("submit", async (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const password = document.getElementById("password") as HTMLInputElement;
     let data = {password: password.value}
     try {
-      const response = await fetch('./', {
+      const response = await fetch('/password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -16,29 +18,14 @@
       });
       switch (response.status) {
         case 200:
-          let responseData = await response.json();
-          let authToken = responseData.authToken;
           input.classList.add("valid");
           message.classList.add("valid");
-          message.innerText = "Vous êtes connecté.";
-          message.classList.remove("hidden");
-          // Stockage du cookie d'authentification
-          window.localStorage.setItem('authToken', authToken);
-          window.location.replace("/config");
-          break;
-        case 401:
-          input.classList.add("invalid");
-          message.innerText = "Mot de passe incorrect";
-          message.classList.remove("hidden");
-          break;
-        case 500:
-          input.classList.add("invalid");
-          message.innerText = "Aucun mot de passe connu.\nContactez votre administrateur.";
+          message.innerText = "Mot de passe modifié.";
           message.classList.remove("hidden");
           break;
         default:
           input.classList.add("invalid");
-          message.innerText = `Erreur ${response.status}`;
+          message.innerText = `Erreur ${response}`;
           message.classList.remove("hidden");
       }
     } catch (error) {

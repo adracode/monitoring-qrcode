@@ -3,9 +3,10 @@ import { TokenManager } from "../services/token";
 
 const {changePasswordFromWeb} = require("../services/password");
 
+
+
 async function changePassword(req: express.Request, res: express.Response, next: NextFunction) {
-    // const newPassword = req.body?.password;
-    const newPassword = "admin";
+    const newPassword = req.body?.password;
     /* Appliquer politique de sécurité */
     if(changePasswordFromWeb(newPassword)){
         TokenManager.getInstance().deleteAllTokens();

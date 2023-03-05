@@ -22,6 +22,4 @@ router.delete("/revoke", parser.json(), config.slashRevoke);
 
 router.post("/disconnect", parser.json(), config.slashDisconnect);
 
-router.get("/password", password)
-
 export default router;

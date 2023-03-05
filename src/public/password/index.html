@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <link rel="icon" href="https://stackoverflow.com/favicon.ico"> -->
+    <link rel="stylesheet" href="style.css" />
+    <meta charset="utf-8" />
+    <title>Changer le mot de passe</title>
+  </head>
+  <body>
+    <form id="login-form">
+      <h2>Changer le mot de passe</h2>
+      <div class="change-password">
+        <input
+          type="password"
+          id="password"
+          class="password-input"
+          name="password"
+          placeholder="​"
+          required
+        />
+        <label for="password" class="password-label">Password</label>
+      </div>
+      <button type="submit">Modifier</button>
+      <div id="message" class="hidden">Message d'erreur</div>
+    </form>
+    <script src="script.js"></script>
+  </body>
+</html>
