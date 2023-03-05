@@ -1,5 +1,6 @@
-import { Sensor } from "../services/sensor";
+import crypto from "crypto";
 import fs from "fs";
+import { Sensor } from "../services/sensor";
 
 function changePasswordInRunningConfig(newHash: string){
     Sensor.setSetting("adminPassword", newHash);
@@ -17,7 +18,6 @@ function changePasswordInFile(newHash: string){
 
 const changePasswordFromWeb = (newPassword: string): boolean => {
     try{
-        var crypto = require('crypto');
         const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
         changePasswordInFile(newHash);
         changePasswordInRunningConfig(newHash);
@@ -31,7 +31,6 @@ const changePasswordFromWeb = (newPassword: string): boolean => {
 
 const changePasswordFromExternal = (newPassword: string): boolean => {
     try{
-        var crypto = require('crypto');
         const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
         changePasswordInFile(newHash);
         return true;
