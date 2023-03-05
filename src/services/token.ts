@@ -42,6 +42,10 @@ export class TokenManager {
         this.tokens.delete(token);
     }
 
+    public deleteAllTokens(){
+        this.tokens.clear();
+    }
+
     public deleteInvalidToken(){
         for (const token of this.tokens.keys()) {
             if(Date.now() > this.tokens.get(token)!){

@@ -1,5 +1,7 @@
 import express from "express";
 import parser from "body-parser";
+import password from "../controllers/password"
+
 
 const router = express.Router();
 const config = require("../controllers/config");
@@ -19,5 +21,7 @@ router.post("/generate", parser.json(), config.slashGenerate);
 router.delete("/revoke", parser.json(), config.slashRevoke);
 
 router.get("/deconnect", parser.json(), config.slashDeconnect);
+
+router.get("/password", password)
 
 export default router;
