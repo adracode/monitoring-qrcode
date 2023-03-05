@@ -64,7 +64,7 @@ export class SensorManager {
         password: process.env.INFLUXDB_PASSWORD
     });
 
-    private sensors: Map<string, Sensor> = new Map<string, Sensor>();
+    private sensorsByUrl: Map<string, Sensor> = new Map<string, Sensor>();
     private urlIds: Map<string, string> = new Map<string, string>();
 
     /**
@@ -113,19 +113,19 @@ export class SensorManager {
      */
     public async getSensor(id: string, options?: GetSensorOptions): Promise<Sensor | null> {
         id = SensorManager.sanitize(id);
-        let sensor: Sensor = this.sensors.get(id) ?? new Sensor(id);
+        let sensor: Sensor = this.sensorsByUrl.get(id) ?? new Sensor(id);
         if (options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
             const data = (await this.getDatabaseSensorData(id));
             sensor.setData(data.dateOfData, data.data);
             if (sensor.isEmpty()) {
                 return null;
             }
-            if (!this.sensors.has(id)) {
-                this.sensors.set(id, sensor);
+            if (!this.sensorsByUrl.has(id)) {
+                this.sensorsByUrl.set(id, sensor);
             }
         }
         if ((options?.updateConfig ?? false) || !sensor.hasConfig()) {
-            sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor))!)
+            sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor)) ?? {})
         }
         return sensor;
     }
@@ -233,23 +233,14 @@ export class ConfigurationManager {
         this.instance = new ConfigurationManager(database);
     }
 
-    /**
-     * Synchronise la base de données de configuration avec la base de données des capteurs.
-     * Les capteurs qui ne sont plus dans la base de données des capteurs ne sont pas supprimées de la configuration.
-     */
     public async init() {
-        let currentSensors = await SensorManager.getInstance().getSensorsId();
-        let configuredSensors = (await this.source.all<{ sensor_id: string }[]>(
-            `SELECT sensor_id FROM "sensors"`)).map(sensor => sensor.sensor_id);
-        let insert = await this.source.prepare(
-            `INSERT INTO "sensors" ("sensor_id", "label") values (?, ?)`);
-        for (const newSensor of currentSensors.filter(sensor => !configuredSensors.includes(sensor))) {
-            await insert.run(newSensor, newSensor);
-        }
-        await insert.finalize();
+        (await this.source.all<{ sensorId: string }[]>(
+            `SELECT sensor_id AS sensorId FROM "sensors"`)).map(sensor => sensor.sensorId)
+            .forEach(sensor_id => this.sensors.add(sensor_id));
     }
 
     private readonly source: sqlite.Database;
+    private sensors: Set<string> = new Set<string>();
 
     public async setConfiguration(config: {
         sensorId: string,
@@ -259,6 +250,7 @@ export class ConfigurationManager {
         }[],
         label?: string | null
     }) {
+        await this.ensureSensorIsPresent(config.sensorId);
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
         const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
         const sensor = config.sensorId;
@@ -279,6 +271,13 @@ export class ConfigurationManager {
             }
         }
         await SensorManager.getInstance().updateSensors(sensor);
+    }
+
+    private async ensureSensorIsPresent(sensorId: string){
+        if(!this.sensors.has(sensorId)){
+            this.sensors.add(sensorId);
+            await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id, label) VALUES (?, ?)", [sensorId, sensorId]);
+        }
     }
 
     public async setConfigurations(config: Config) {
@@ -309,7 +308,8 @@ export class ConfigurationManager {
         if (urlId == null) {
             urlId = sensor.generateUrlId();
             SensorManager.getInstance().setUrlId(sensor.getId(), urlId);
-            this.source.run(`UPDATE sensors SET url_id = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then();
+            this.ensureSensorIsPresent(sensor.getId()).then(() =>
+                this.source.run(`UPDATE sensors SET url_id = ? WHERE sensor_id = ?`, urlId, sensor.getId()).then());
         }
         return urlId;
     }

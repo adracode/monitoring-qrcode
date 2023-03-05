@@ -37,7 +37,7 @@ export class Sensor {
 
     public setConfiguration(config: ConfigurationSensor) {
         this.config = config;
-        if (config.label == "") {
+        if (config.label == null || config.label == "") {
             this.config.label = undefined;
         }
     }
