@@ -13,6 +13,10 @@ async function changePassword(req: express.Request, res: express.Response, next:
     }
     if (changePasswordFromWeb(newPassword)) {
         TokenManager.getInstance().deleteAllTokens();
+        res.clearCookie("authToken", {
+          httpOnly: true,
+          sameSite: "lax"
+        });
         res.sendStatus(200);
         return;
     }
