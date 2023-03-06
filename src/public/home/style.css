@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) fixed;
+  background-size: 200% 200%;
+  animation: gradient 30s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+div {
+  font-family: Helvetica, sans-serif;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+body .container {
+  width: 75%;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.box {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  padding: 25px;
+  flex-basis: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin: 15px;
+  white-space: nowrap;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
+  font-size: 2vmax;
+  font-weight: bold;
+  color: black;
+  word-wrap: break-word;
+}
+
+#home-name{
+  padding: 5px;
+  margin: 5px;
+  font-size: 3vmax;
+  width: 75%;
+  white-space: break-spaces;
+}
+
+/* Animation de fond */
+@keyframes gradient {
+  0% {
+      background-position: 0 0;
+  }
+
+  50% {
+      background-position: 100% 100%;
+  }
+
+  100% {
+      background-position: 0 0;
+  }
+}
+
+.hidden {
+  display: none;
+}

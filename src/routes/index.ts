@@ -1,5 +1,6 @@
 import express from "express";
 import sensors from "./sensors";
+import home from "./home";
 import config from "./config";
 import login from "./login";
 import password from "./password"
@@ -9,19 +10,16 @@ import { getPublic } from "../utils/path";
 
 const router = express.Router();
 
-const sensorsStatic = express.static(getPublic("sensors"));
-
-
 router.use(
   "/login",
   express.static(getPublic("login"), { extensions: ["html"] }),
   login
 );
 router.use(
-    "/password",
-    auth,
-    express.static(getPublic("password"), {extensions: ["html"]}),
-    password
+  "/password",
+  auth,
+  express.static(getPublic("password"), { extensions: ["html"] }),
+  password
 )
 router.use(
   "/config",
@@ -30,8 +28,8 @@ router.use(
   config
 );
 
-router.use("/", sensorsStatic, sensors);
-router.use("/sensors", sensorsStatic, sensors);
+router.use("/", express.static(getPublic("home")), home);
+router.use("/sensors", express.static(getPublic("sensors")), sensors);
 
 //router.use("/dev", express.static(getPublic("dev")))
 //router.use("/dev", dev);
