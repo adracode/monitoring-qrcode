@@ -25,8 +25,8 @@ router.use(
 )
 router.use(
   "/config",
-  express.static(getPublic("config"), { extensions: ["html"] }),
   auth,
+  express.static(getPublic("config"), { extensions: ["html"] }),
   config
 );
 

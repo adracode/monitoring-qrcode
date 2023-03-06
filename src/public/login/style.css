@@ -84,7 +84,7 @@ button[type="submit"] {
 
 /* Définition des styles pour le placeholder */
 /* <--- */
-.change-password {
+.password {
   position: relative;
   padding: 15px 0 0;
   margin-top: 10px;
