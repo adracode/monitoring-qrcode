@@ -5,33 +5,30 @@ import config from "./config";
 import login from "./login";
 import password from "./password"
 import auth from "../controllers/auth";
-//import dev from "./dev";
 import { getPublic } from "../utils/path";
 
 const router = express.Router();
 
 router.use(
-  "/login",
-  express.static(getPublic("login"), { extensions: ["html"] }),
-  login
+    "/login",
+    express.static(getPublic("login"), { extensions: ["html"] }),
+    login
 );
 router.use(
-  "/password",
-  auth,
-  express.static(getPublic("password"), { extensions: ["html"] }),
-  password
+    "/password",
+    auth,
+    express.static(getPublic("password"), { extensions: ["html"] }),
+    password
 )
 router.use(
-  "/config",
-  auth,
-  express.static(getPublic("config"), { extensions: ["html"] }),
-  config
+    "/config",
+    auth,
+    express.static(getPublic("config"), { extensions: ["html"] }),
+    config
 );
 
 router.use("/", express.static(getPublic("home")), home);
-router.use("/sensors", express.static(getPublic("sensors")), sensors);
 
-//router.use("/dev", express.static(getPublic("dev")))
-//router.use("/dev", dev);
+router.use("/sensors", express.static(getPublic("sensors")), sensors);
 
 export default router;

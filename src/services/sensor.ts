@@ -14,11 +14,11 @@ type SensorSetting = {
 
 export class Sensor {
     private static readonly settings: SensorSetting = {
-       updateInterval: 10 * 60 * 1_000,
-       expirationTime: 30 * 60 * 1_000,
-       tokenExpirationTime: 30 * 60 * 1_000,
-       deleteTokenInterval: 60 * 60 * 24 * 1_000,
-       adminPassword: undefined
+        updateInterval: 10 * 60 * 1_000,
+        expirationTime: 30 * 60 * 1_000,
+        tokenExpirationTime: 30 * 60 * 1_000,
+        deleteTokenInterval: 60 * 60 * 24 * 1_000,
+        adminPassword: undefined
     }
 
     private readonly id: string;
@@ -31,13 +31,21 @@ export class Sensor {
         this.id = id;
     }
 
+    public static setSetting(id: string, value: any) {
+        Sensor.settings[id] = value;
+    }
+
+    public static getSetting<T>(id: string): T {
+        return Sensor.settings[id] as T;
+    }
+
     public needUpdate(): boolean {
         return this.lastDatabaseUpdate < Date.now() - Sensor.settings.updateInterval;
     }
 
     public setConfiguration(config: ConfigurationSensor) {
         this.config = config;
-        if (config.label == null || config.label == "") {
+        if(config.label == null || config.label == "") {
             this.config.label = undefined;
         }
     }
@@ -49,7 +57,7 @@ export class Sensor {
     }
 
     public get(type?: string[]): SensorsData {
-        if (this.isExpired()) {
+        if(this.isExpired()) {
             return [];
         }
         const types = type ?? Object.keys(this.config.type ?? {});
@@ -95,13 +103,5 @@ export class Sensor {
 
     public revokeUrlId() {
         this.config.urlId = undefined;
-    }
-
-    public static setSetting(id: string, value: any) {
-        Sensor.settings[id] = value;
-    }
-
-    public static getSetting<T>(id: string) : T {
-        return Sensor.settings[id] as T;
     }
 }

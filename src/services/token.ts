@@ -6,10 +6,11 @@ export class TokenManager {
 
     private tokens: Map<string, number> = new Map<string, number>();
 
-    private constructor() {}
+    private constructor() {
+    }
 
     public static getInstance(): TokenManager {
-        if (TokenManager.instance === undefined) {
+        if(TokenManager.instance === undefined) {
             throw new Error("Object not initialized, use TokenManager.init() to create.")
         }
         return TokenManager.instance;
@@ -19,36 +20,36 @@ export class TokenManager {
         this.instance = new TokenManager();
     }
 
-    public createToken(): string{
+    public createToken(): string {
         const token = crypto.randomBytes(33).toString("base64url");
         this.tokens.set(token, Date.now() + Sensor.getSetting<number>("tokenExpirationTime"));
         return token;
     }
 
-    public isValid(token: string): boolean{
-        if(this.tokens.has(token)){
-            if(Date.now() < this.tokens.get(token)!){
+    public isValid(token: string): boolean {
+        if(this.tokens.has(token)) {
+            if(Date.now() < this.tokens.get(token)!) {
                 return true;
             } else {
                 this.deleteToken(token);
                 return false;
             }
-        } else{
+        } else {
             return false;
         }
     }
 
-    public deleteToken(token: string){
+    public deleteToken(token: string) {
         this.tokens.delete(token);
     }
 
-    public deleteAllTokens(){
+    public deleteAllTokens() {
         this.tokens.clear();
     }
 
-    public deleteInvalidToken(){
-        for (const token of this.tokens.keys()) {
-            if(Date.now() > this.tokens.get(token)!){
+    public deleteInvalidToken() {
+        for(const token of this.tokens.keys()) {
+            if(Date.now() > this.tokens.get(token)!) {
                 this.deleteToken(token);
             }
         }

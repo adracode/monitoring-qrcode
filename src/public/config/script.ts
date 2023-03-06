@@ -9,21 +9,21 @@ let mode = Mode.CONFIG;
 let loadedQRCodes = false;
 let selected: Element[] = [];
 
-for (let setType of document.getElementsByClassName("set-data-type")) {
+for(let setType of document.getElementsByClassName("set-data-type")) {
     setType.addEventListener("click", async (event) => {
-        if (mode != Mode.CONFIG) {
+        if(mode != Mode.CONFIG) {
             return;
         }
         const checkBox = event.target as HTMLInputElement;
         const identifier = checkBox.id.split(":");
-        if (identifier.length !== 2) {
+        if(identifier.length !== 2) {
             console.error("Le type de données n'a pas pu être identifié, merci de recharger la page");
             return;
         }
         (setType as HTMLInputElement).disabled = true;
         await fetch("./set", {
             method: "POST",
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 sensorId: identifier[0],
                 typeId: identifier[1],
@@ -57,21 +57,21 @@ const dynamic: {
         performOnElements: [{
             elements: document.querySelectorAll(".link-sensor"),
             onSelect: (element: Element) => {
-                if (element.getAttribute("href") == "") {
+                if(element.getAttribute("href") == "") {
                     hide(element);
                 }
             }
         }, {
             elements: document.querySelectorAll(".generate-qrcode"),
             onSelect: (element => {
-                if (hasURL(element.parentElement!)) {
+                if(hasURL(element.parentElement!)) {
                     hide(element);
                 }
             })
         }, {
             elements: document.querySelectorAll(".revoke-qrcode"),
             onSelect: (element => {
-                if (!hasURL(element.parentElement!)) {
+                if(!hasURL(element.parentElement!)) {
                     hide(element);
                 }
             })
@@ -86,11 +86,11 @@ const dynamic: {
         performOnElements: [{
             elements: document.querySelectorAll(".qr-container"),
             onSelect: (element) => {
-                if (!hasURL(element)) {
+                if(!hasURL(element)) {
                     hide(element);
                 }
                 element.classList.add("clickable")
-                if (selected.includes(element)) {
+                if(selected.includes(element)) {
                     element.classList.add("selected");
                 }
             },
@@ -110,29 +110,29 @@ const dynamic: {
     }
 }
 
-for (let tab of document.getElementsByClassName("select-page")) {
+for(let tab of document.getElementsByClassName("select-page")) {
     tab.addEventListener("click", async (event) => {
         const nextId = tab.id.split("select-")[1];
-        for (let [key, value] of Object.entries(dynamic)) {
-            if (key !== nextId) {
-                if (value.onQuit != null) {
+        for(let [key, value] of Object.entries(dynamic)) {
+            if(key !== nextId) {
+                if(value.onQuit != null) {
                     await value.onQuit();
                 }
                 value.visibility.forEach(hide);
                 value.performOnElements?.forEach(elements => {
-                    if (elements.onQuit != null) {
+                    if(elements.onQuit != null) {
                         elements.elements.forEach(element => elements.onQuit!(element));
                     }
                 });
             }
         }
         const next = dynamic[nextId];
-        if (next.onSelect != null) {
+        if(next.onSelect != null) {
             await next.onSelect();
         }
         next.visibility.forEach(show);
         next.performOnElements?.forEach(elements => {
-            if (elements.onSelect != null) {
+            if(elements.onSelect != null) {
                 elements.elements.forEach(element => elements.onSelect!(element));
             }
         });
@@ -144,13 +144,13 @@ function hasURL(qrContainer: Element): boolean {
 }
 
 async function loadQrCodes() {
-    if (!loadedQRCodes) {
+    if(!loadedQRCodes) {
         loadedQRCodes = true;
         const res = await fetch("./get-qrcodes", {
             method: "GET"
         });
         let qrCodes: { [id: string]: { qrcode: string, link: string } } = await res.json();
-        for (let [key, value] of Object.entries(qrCodes)) {
+        for(let [key, value] of Object.entries(qrCodes)) {
             const div = document.getElementById(key)!;
             (div.querySelector(".qr-code-svg")! as HTMLImageElement).src = value.qrcode;
             (div.querySelector(".link-sensor")! as HTMLLinkElement).href = value.link;
@@ -158,12 +158,12 @@ async function loadQrCodes() {
     }
 }
 
-for (let container of document.getElementsByClassName("qr-container")) {
+for(let container of document.getElementsByClassName("qr-container")) {
     container.addEventListener("click", (event) => {
-        if (mode != Mode.PRINT) {
+        if(mode != Mode.PRINT) {
             return;
         }
-        if (container.classList.contains("selected")) {
+        if(container.classList.contains("selected")) {
             container.classList.remove("selected");
             selected.splice(selected.indexOf(container), 1)
         } else {
@@ -173,7 +173,7 @@ for (let container of document.getElementsByClassName("qr-container")) {
     })
 }
 
-for (let generate of document.getElementsByClassName("generate-qrcode")) {
+for(let generate of document.getElementsByClassName("generate-qrcode")) {
     generate.addEventListener("click", async () => {
         const sensor = generate.parentElement!;
         const res = await fetch("./generate", {
@@ -181,7 +181,7 @@ for (let generate of document.getElementsByClassName("generate-qrcode")) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({sensor: sensor.id})
+            body: JSON.stringify({ sensor: sensor.id })
         })
         let qrCode: { qrcode: string, link: string } = await res.json();
         const image: HTMLImageElement = sensor.querySelector(".qr-code-svg")!;
@@ -213,14 +213,14 @@ function openConfirm() {
     modalTitle.textContent = `Confirmer la révocation: ${selectionRevoke.parentElement!.id}`;
 }
 
-window.onclick = function (event) {
-    if (event.target == modal) {
+window.onclick = function(event) {
+    if(event.target == modal) {
         closeConfirm();
     }
 }
 
 let selectionRevoke: HTMLElement;
-for (let revoke of document.getElementsByClassName("revoke-qrcode")) {
+for(let revoke of document.getElementsByClassName("revoke-qrcode")) {
     revoke.addEventListener("click", async () => {
         selectionRevoke = revoke as HTMLElement;
         openConfirm();
@@ -236,7 +236,7 @@ document.getElementById("confirm-revoke-button")!.addEventListener("click", asyn
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({sensor: sensor.id})
+        body: JSON.stringify({ sensor: sensor.id })
     });
     (event.target as HTMLButtonElement).disabled = false;
     const image: HTMLImageElement = sensor.querySelector(".qr-code-svg")!;
@@ -252,21 +252,21 @@ document.getElementById("confirm-revoke-button")!.addEventListener("click", asyn
 
 let labelsValue: { [id: string]: string | null } = {};
 
-for (let input of document.querySelectorAll(".change-label")) {
+for(let input of document.querySelectorAll(".change-label")) {
     labelsValue[input.id] = input.textContent;
     input.addEventListener("keydown", event => {
-        if ((event as KeyboardEvent).key === "Enter") {
+        if((event as KeyboardEvent).key === "Enter") {
             event.preventDefault()
         }
     });
     input.addEventListener("input", (event) => {
-        if (!input.classList.contains("modified")) {
+        if(!input.classList.contains("modified")) {
             input.classList.add("modified")
         }
-        if (input.classList.contains("validated")) {
+        if(input.classList.contains("validated")) {
             input.classList.remove("validated")
         }
-        if ((input as HTMLTextAreaElement).value === labelsValue[input.id]) {
+        if((input as HTMLTextAreaElement).value === labelsValue[input.id]) {
             input.classList.remove("modified")
         }
     });
@@ -274,16 +274,16 @@ for (let input of document.querySelectorAll(".change-label")) {
         input.classList.remove("modified", "validated")
     });
     input.addEventListener("blur", event => {
-        if (input.classList.contains("modified")) {
+        if(input.classList.contains("modified")) {
             (input as HTMLTextAreaElement).value = labelsValue[input.id]!;
         }
     });
 }
 
-for (let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode > .change-label")) {
+for(let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode > .change-label")) {
     changeLabel.addEventListener("keydown", async (event) => {
-        if ((event as KeyboardEvent).key === "Enter") {
-            if (mode != Mode.CONFIG || !changeLabel.classList.contains("modified")) {
+        if((event as KeyboardEvent).key === "Enter") {
+            if(mode != Mode.CONFIG || !changeLabel.classList.contains("modified")) {
                 return;
             }
             const input = event.target as HTMLTextAreaElement;
@@ -291,7 +291,7 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode
             input.classList.remove("modified")
             await fetch("./set", {
                 method: "POST",
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sensorId: identifier,
                     label: input.value
@@ -303,10 +303,10 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-qrcode
     });
 }
 
-for (let changeLabel of document.querySelectorAll(".form-change-label.for-type > .change-label")) {
+for(let changeLabel of document.querySelectorAll(".form-change-label.for-type > .change-label")) {
     changeLabel.addEventListener("keydown", async (event) => {
-        if ((event as KeyboardEvent).key === "Enter") {
-            if (mode != Mode.LABEL || !changeLabel.classList.contains("modified")) {
+        if((event as KeyboardEvent).key === "Enter") {
+            if(mode != Mode.LABEL || !changeLabel.classList.contains("modified")) {
                 return;
             }
             const input = event.target as HTMLInputElement;
@@ -314,7 +314,7 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
             input.classList.remove("modified")
             await fetch("./set-label", {
                 method: "POST",
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     typeId: identifier,
                     label: input.value == null || input.value === "" ? null : input.value
@@ -326,7 +326,7 @@ for (let changeLabel of document.querySelectorAll(".form-change-label.for-type >
     });
 }
 
-for(let disconnect of document.querySelectorAll(".disconnect-button")){
+for(let disconnect of document.querySelectorAll(".disconnect-button")) {
     disconnect.addEventListener("click", async (event) => {
         let res = await fetch("./disconnect", {
             method: "POST"
@@ -335,13 +335,13 @@ for(let disconnect of document.querySelectorAll(".disconnect-button")){
     });
 }
 
-for(let disconnect of document.querySelectorAll(".change-password-button")){
+for(let disconnect of document.querySelectorAll(".change-password-button")) {
     disconnect.addEventListener("click", async (event) => {
         window.location.href = "/password";
     });
 }
 
-for (let printButton of document.querySelectorAll(".print-qrcodes")) {
+for(let printButton of document.querySelectorAll(".print-qrcodes")) {
     printButton.addEventListener("click", (event) => {
         let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({
             title: img.parentElement.id,
@@ -354,16 +354,16 @@ for (let printButton of document.querySelectorAll(".print-qrcodes")) {
 
 function initPrint(qrcodes: { title: string, img: HTMLImageElement }[]): HTMLDivElement {
     let chunks: { title: string, img: HTMLImageElement }[][] = []
-    for (let i = 0; i < qrcodes.length; i += 6) {
+    for(let i = 0; i < qrcodes.length; i += 6) {
         chunks.push(qrcodes.slice(i, i + 6));
     }
     const allPages = document.createElement("div");
     allPages.classList.add("print");
-    for (const chunk of chunks) {
+    for(const chunk of chunks) {
         const page = document.createElement("div");
         page.classList.add("page");
         allPages.appendChild(page);
-        for (const [index, qrcode] of chunk.entries()) {
+        for(const [index, qrcode] of chunk.entries()) {
             const clone = qrcode.img.cloneNode() as HTMLImageElement;
             const qrcodeDiv = document.createElement("div");
             qrcodeDiv.classList.add(`img-${index}`, "qrcode-img-container");

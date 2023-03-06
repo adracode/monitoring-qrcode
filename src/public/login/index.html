@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <!-- <link rel="icon" href="https://stackoverflow.com/favicon.ico"> -->
-    <link rel="stylesheet" href="style.css" />
-    <meta charset="utf-8" />
+    <link href="style.css" rel="stylesheet"/>
+    <meta charset="utf-8"/>
     <title>Authentification</title>
-  </head>
-  <body>
-    <form id="login-form">
-      <h2>Authentification</h2>
-      <div class="password">
-        <input
-          type="password"
-          id="password"
-          class="password-input"
-          name="password"
-          placeholder="​"
-          required
+</head>
+<body>
+<form id="login-form">
+    <h2>Authentification</h2>
+    <div class="password">
+        <input class="password-input"
+               id="password"
+               name="password"
+               placeholder="​"
+               required
+               type="password"
         />
-        <label for="password" class="password-label">Mot de passe</label>
-      </div>
-      <button type="submit">Se connecter</button>
-      <div id="message" class="hidden">Message d'erreur</div>
-    </form>
-    <script src="script.js"></script>
-  </body>
+        <label class="password-label" for="password">Mot de passe</label>
+    </div>
+    <button type="submit">Se connecter</button>
+    <div class="hidden" id="message">Message d'erreur</div>
+</form>
+<script src="script.js"></script>
+</body>
 </html>

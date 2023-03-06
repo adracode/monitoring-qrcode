@@ -6,5 +6,4 @@ const router = express.Router();
 
 router.post("/", parser.json(), logIn);
 
-
 export default router;

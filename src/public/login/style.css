@@ -1,158 +1,159 @@
 /* Définition des styles pour le body */
 body {
-  font-family: Helvetica, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #f2f2f2;
+    font-family: Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f2f2f2;
 }
 
 /* Définition des styles pour le titre h2 */
 h2 {
-  color: #333;
-  font-size: 32px;
-  font-weight: 500;
-  margin-bottom: 40px;
+    color: #333;
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 40px;
 }
 
 /* Définition des styles pour le formulaire */
 #login-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 40px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Définition des styles pour le label */
 label {
-  display: block;
-  color: #333;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 10px;
+    display: block;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
 /* Définition des styles pour l'input */
 input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  /*border: 1px solid #ddd;*/
-  border-radius: 5px;
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 20px;
+    width: 100%;
+    padding: 10px;
+    /*border: 1px solid #ddd;*/
+    border-radius: 5px;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 /* Définition des styles pour le bouton de soumission */
 button[type="submit"] {
-  background-color: #915cff;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
+    background-color: #915cff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
 /* Définition des styles pour le message d'erreur */
 #message {
-  color: #ff0000;
-  font-size: 16px;
-  font-weight: 500;
-  margin-top: 10px;
-  text-align: center;
+    color: #ff0000;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+    text-align: center;
 }
 
 /* Définition des styles pour le message de validation */
 #message.valid {
-  color: #05cb00;
+    color: #05cb00;
 }
 
 /* Définition du style pour cacher le message */
 .hidden {
-  visibility: hidden;
+    visibility: hidden;
 }
 
 /* Définition des styles pour le placeholder */
 /* <--- */
 .password {
-  position: relative;
-  padding: 15px 0 0;
-  margin-top: 10px;
-  width: 100%;
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 100%;
 }
 
 .password-input {
-  font-family: inherit;
-  border: 0;
-  outline: 0;
-  font-size: 1.3rem;
-  padding: 7px 0 7px 10px;
-  margin-bottom: 10px;
-  transition: border-color 0.2s;
-  background-color: #f0f0f0;
-  border-radius: 10px;
-  box-sizing: border-box;
+    font-family: inherit;
+    border: 0;
+    outline: 0;
+    font-size: 1.3rem;
+    padding: 7px 0 7px 10px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .password-input::placeholder {
-  color: transparent;
+    color: transparent;
 }
 
-.password-input:placeholder-shown~.password-label {
-  font-size: 1.3rem;
-  cursor: text;
-  top: 20px;
-  margin-left: 10px;
+.password-input:placeholder-shown ~ .password-label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+    margin-left: 10px;
 }
 
 .password-label {
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 1rem;
-  color: #9b9b9b;
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #9b9b9b;
 }
 
 .password-input:focus {
-  padding-bottom: 6px;
-  border-bottom: 3px solid;
-  border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
-  margin-bottom: 21px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+    padding-bottom: 6px;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
+    margin-bottom: 21px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .password-input.invalid {
-  border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
+    border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
 }
 
 .password-input.valid {
-  border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
+    border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
 }
 
-.password-input:focus~.password-label {
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 1rem;
-  margin-left: 0;
-  color: #915cff;
-  font-weight: 700;
+.password-input:focus ~ .password-label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    margin-left: 0;
+    color: #915cff;
+    font-weight: 700;
 }
 
 /* reset input */
 .password-input:required,
 .password-input:invalid {
-  box-shadow: none;
+    box-shadow: none;
 }
+
 /* ---> */

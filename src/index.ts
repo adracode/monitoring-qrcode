@@ -1,7 +1,7 @@
 import app from "./app"
-import {ConfigurationManager, SensorManager} from "./services/data-management";
-import {TokenManager} from "./services/token";
-import {Sensor} from "./services/sensor";
+import { ConfigurationManager, SensorManager } from "./services/data-management";
+import { TokenManager } from "./services/token";
+import { Sensor } from "./services/sensor";
 
 const port = Number(process.env.PORT) || 3000;
 

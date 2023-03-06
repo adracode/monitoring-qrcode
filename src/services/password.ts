@@ -2,22 +2,22 @@ import crypto from "crypto";
 import fs from "fs";
 import { Sensor } from "../services/sensor";
 
-function changePasswordInRunningConfig(newHash: string){
+function changePasswordInRunningConfig(newHash: string) {
     Sensor.setSetting("adminPassword", newHash);
 }
 
-function changePasswordInFile(newHash: string){
+function changePasswordInFile(newHash: string) {
     try {
         let jsonString = JSON.parse(fs.readFileSync("config.json", "utf-8"));
         jsonString.adminPassword = newHash;
         fs.writeFileSync("config.json", JSON.stringify(jsonString, null, 4));
-    } catch (e) {
+    } catch(e) {
         throw(e);
     }
 }
 
 const changePasswordFromWeb = (newPassword: string): boolean => {
-    try{
+    try {
         const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
         changePasswordInFile(newHash);
         changePasswordInRunningConfig(newHash);
@@ -30,7 +30,7 @@ const changePasswordFromWeb = (newPassword: string): boolean => {
 }
 
 const changePasswordFromExternal = (newPassword: string): boolean => {
-    try{
+    try {
         const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
         changePasswordInFile(newHash);
         return true;
@@ -39,7 +39,6 @@ const changePasswordFromExternal = (newPassword: string): boolean => {
         console.error("Can't change password");
         return false;
     }
-    
 }
 
-module.exports = {changePasswordFromWeb, changePasswordFromExternal};
+module.exports = { changePasswordFromWeb, changePasswordFromExternal };

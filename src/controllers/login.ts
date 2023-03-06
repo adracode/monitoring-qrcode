@@ -1,16 +1,16 @@
-import express, { NextFunction } from "express";
+import express from "express";
 import crypto from "crypto";
 import { TokenManager } from "../services/token";
 import { Sensor } from "../services/sensor";
 
-async function logIn(req: express.Request, res: express.Response, next: NextFunction) {
+async function logIn(req: express.Request, res: express.Response) {
     const hash = crypto.createHash('sha256').update(req.body?.password).digest('hex');
     const hashPassword = Sensor.getSetting<string>("adminPassword")?.toLowerCase();
-    if (hashPassword === undefined) {
-        res.status(500).json({message: "Aucun mot de passe connu.\nContactez votre administrateur."});
+    if(hashPassword === undefined) {
+        res.status(500).json({ message: "Aucun mot de passe connu.\nContactez votre administrateur." });
         return;
     }
-    if (hashPassword === hash) {
+    if(hashPassword === hash) {
         const authToken = TokenManager.getInstance().createToken();
         res.cookie("authToken", authToken, {
             httpOnly: true,
@@ -20,7 +20,7 @@ async function logIn(req: express.Request, res: express.Response, next: NextFunc
         return;
     }
     res.set('Content-Type', 'text/html')
-    res.status(401).json({message: "Mot de passe incorrect."});
-};
+    res.status(401).json({ message: "Mot de passe incorrect." });
+}
 
 export default logIn

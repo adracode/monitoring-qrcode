@@ -1,25 +1,23 @@
 import express from "express";
 import parser from "body-parser";
-import password from "../controllers/password"
-
 
 const router = express.Router();
 const config = require("../controllers/config");
 
-router.get("/", config.slash);
+router.get("/", config.configPage);
 
-router.get("/get-qrcodes", config.slashGetQrCodes);
+router.get("/get-qrcodes", config.getQRCodes);
 
-router.post("/set", parser.json(), config.slashSet);
+router.post("/set", parser.json(), config.setConfiguration);
 
-router.post("/set-label", parser.json(), config.slashSetLabel);
+router.post("/set-label", parser.json(), config.setTypeLabel);
 
-router.post("/sensors", config.slashSensors);
+router.post("/sensors", config.getAllSensors);
 
-router.post("/generate", parser.json(), config.slashGenerate);
+router.post("/generate", parser.json(), config.generateQRCode);
 
-router.delete("/revoke", parser.json(), config.slashRevoke);
+router.delete("/revoke", parser.json(), config.revokeQRCode);
 
-router.post("/disconnect", parser.json(), config.slashDisconnect);
+router.post("/disconnect", parser.json(), config.disconnect);
 
 export default router;

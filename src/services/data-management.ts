@@ -1,8 +1,8 @@
-import {InfluxDB} from "influx";
-import sqlite, {open} from "sqlite"
+import { InfluxDB } from "influx";
+import sqlite, { open } from "sqlite"
 import wrapped from "sqlite3"
-import {ConfigurationSensor, Sensor, SensorsData} from "./sensor"
-import {getSQLFile} from "../utils/path"
+import { ConfigurationSensor, Sensor, SensorsData } from "./sensor"
+import { getSQLFile } from "../utils/path"
 import * as fs from "fs";
 
 type SensorName = { name: string };
@@ -43,17 +43,6 @@ type GetSensorOptions = {
 export class SensorManager {
 
     private static instance: SensorManager;
-
-    private constructor() {
-    }
-
-    public static getInstance(): SensorManager {
-        if (SensorManager.instance === undefined) {
-            throw new Error("Object not initialized, use SensorManager.init() to create.")
-        }
-        return SensorManager.instance;
-    }
-
     private readonly source = new InfluxDB({
         protocol: "https",
         host: process.env.INFLUXDB_HOST,
@@ -63,9 +52,32 @@ export class SensorManager {
         username: process.env.INFLUXDB_USERNAME,
         password: process.env.INFLUXDB_PASSWORD
     });
-
     private sensorsByUrl: Map<string, Sensor> = new Map<string, Sensor>();
     private urlIds: Map<string, string> = new Map<string, string>();
+
+    private constructor() {
+    }
+
+    public static getInstance(): SensorManager {
+        if(SensorManager.instance === undefined) {
+            throw new Error("Object not initialized, use SensorManager.init() to create.")
+        }
+        return SensorManager.instance;
+    }
+
+    public static async init() {
+        this.instance = new SensorManager();
+    }
+
+    /**
+     * Assainit une séquence afin d'éviter les injections SQL, en n'autorisant que les caractères alphanumériques et les tirets / underscores.
+     * Deux tirets étant un commentaire, il faut utiliser le résultat de cette méthode entre guillements dans la requête.
+     * @param input La séquence à assainir.
+     * @private
+     */
+    private static sanitize(input: string): string {
+        return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
+    }
 
     /**
      * Renvoie tous les capteurs présents dans la base de données sous forme de leur ID.
@@ -74,18 +86,14 @@ export class SensorManager {
         return (await this.source.query<SensorName>(`SHOW MEASUREMENTS`)).map(sensor => sensor.name);
     }
 
-    public static async init() {
-        this.instance = new SensorManager();
-    }
-
     public async init() {
-        for (let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
+        for(let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
             this.setUrlId(sensorId.id, sensorId.urlId);
         }
     }
 
     public setUrlId(sensor: string | null, urlId: string) {
-        if (sensor != null) {
+        if(sensor != null) {
             this.urlIds.set(urlId, sensor);
         } else {
             this.urlIds.delete(urlId);
@@ -114,17 +122,17 @@ export class SensorManager {
     public async getSensor(id: string, options?: GetSensorOptions): Promise<Sensor | null> {
         id = SensorManager.sanitize(id);
         let sensor: Sensor = this.sensorsByUrl.get(id) ?? new Sensor(id);
-        if (options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
+        if(options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
             const data = (await this.getDatabaseSensorData(id));
             sensor.setData(data.dateOfData, data.data);
-            if (sensor.isEmpty()) {
+            if(sensor.isEmpty()) {
                 return null;
             }
-            if (!this.sensorsByUrl.has(id)) {
+            if(!this.sensorsByUrl.has(id)) {
                 this.sensorsByUrl.set(id, sensor);
             }
         }
-        if ((options?.updateConfig ?? false) || !sensor.hasConfig()) {
+        if((options?.updateConfig ?? false) || !sensor.hasConfig()) {
             sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor)) ?? {})
         }
         return sensor;
@@ -133,34 +141,6 @@ export class SensorManager {
     public async getSensors(options?: GetSensorOptions): Promise<Sensor[]> {
         return await Promise.all((await this.getSensorsId())
             .map(async (sensorId: string) => (await this.getSensor(sensorId, options))!))
-    }
-
-    /**
-     * Récupère toutes les données d'un capteur de la base de données
-     * @param id L'ID du capteur
-     * @private
-     */
-    private async getDatabaseSensorData(id: string): Promise<{ dateOfData: number, data: SensorsData }> {
-        const rawData = (await this.source.query<RawData>(
-            `SELECT * FROM "${SensorManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
-        )).at(0) ?? {};
-        return {
-            dateOfData: Math.floor((rawData.time?.getNanoTime() ?? 0) / 1_000_000),
-            data: Object.entries(rawData).map(([dataType, data]) => ({
-                type: dataType,
-                value: data
-            }))
-        };
-    }
-
-    /**
-     * Assainit une séquence afin d'éviter les injections SQL, en n'autorisant que les caractères alphanumériques et les tirets / underscores.
-     * Deux tirets étant un commentaire, il faut utiliser le résultat de cette méthode entre guillements dans la requête.
-     * @param input La séquence à assainir.
-     * @private
-     */
-    private static sanitize(input: string): string {
-        return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
     }
 
     /**
@@ -187,7 +167,7 @@ export class SensorManager {
     public async getAllDataTypes(): Promise<string[]> {
         return (await this.source.query<{ fieldKey: string }>(`SHOW FIELD KEYS`))
             .reduce((acc: string[], cur) => {
-                if (!acc.includes(cur.fieldKey)) {
+                if(!acc.includes(cur.fieldKey)) {
                     acc.push(cur.fieldKey);
                 }
                 return acc;
@@ -195,9 +175,27 @@ export class SensorManager {
     }
 
     public async updateSensors(...ids: string[]) {
-        for (let sensor of ids.length == 0 ? await this.getSensorsId() : ids) {
-            this.getSensor(sensor, {updateData: false, updateConfig: true}).then();
+        for(let sensor of ids.length == 0 ? await this.getSensorsId() : ids) {
+            this.getSensor(sensor, { updateData: false, updateConfig: true }).then();
         }
+    }
+
+    /**
+     * Récupère toutes les données d'un capteur de la base de données
+     * @param id L'ID du capteur
+     * @private
+     */
+    private async getDatabaseSensorData(id: string): Promise<{ dateOfData: number, data: SensorsData }> {
+        const rawData = (await this.source.query<RawData>(
+            `SELECT * FROM "${SensorManager.sanitize(id)}" ORDER BY time DESC LIMIT 1`
+        )).at(0) ?? {};
+        return {
+            dateOfData: Math.floor((rawData.time?.getNanoTime() ?? 0) / 1_000_000),
+            data: Object.entries(rawData).map(([dataType, data]) => ({
+                type: dataType,
+                value: data
+            }))
+        };
     }
 }
 
@@ -205,13 +203,15 @@ type TypeBySensor = { sensorId: string; typesId: string };
 
 export class ConfigurationManager {
     private static instance: ConfigurationManager;
+    private readonly source: sqlite.Database;
+    private sensors: Set<string> = new Set<string>();
 
     private constructor(database: sqlite.Database) {
         this.source = database;
     }
 
     public static getInstance(): ConfigurationManager {
-        if (ConfigurationManager.instance === undefined) {
+        if(ConfigurationManager.instance === undefined) {
             throw new Error("Object not initialized, use ConfigurationManager.init() to create.")
         }
         return this.instance;
@@ -222,7 +222,7 @@ export class ConfigurationManager {
      * @public
      */
     public static async init() {
-        if (this.instance != null) {
+        if(this.instance != null) {
             return this.getInstance();
         }
         let database = await open({
@@ -233,14 +233,15 @@ export class ConfigurationManager {
         this.instance = new ConfigurationManager(database);
     }
 
+    private static getSQLiteFile(path: string): string {
+        return fs.readFileSync(getSQLFile(path)).toString()
+    }
+
     public async init() {
         (await this.source.all<{ sensorId: string }[]>(
             `SELECT sensor_id AS sensorId FROM "sensors"`)).map(sensor => sensor.sensorId)
             .forEach(sensor_id => this.sensors.add(sensor_id));
     }
-
-    private readonly source: sqlite.Database;
-    private sensors: Set<string> = new Set<string>();
 
     public async setConfiguration(config: {
         sensorId: string,
@@ -254,58 +255,28 @@ export class ConfigurationManager {
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
         const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
         const sensor = config.sensorId;
-        if (config.label != null) {
+        if(config.label != null) {
             const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
             await update.run(config.label, sensor);
         }
         let configuredTypes = (await this.getTypesBySensorId([sensor]))[sensor];
-        for (let type of config.types ?? []) {
+        for(let type of config.types ?? []) {
             let typeId = type.id;
             let set = type.set;
-            if (configuredTypes.includes(typeId)) {
-                if (!set) {
+            if(configuredTypes.includes(typeId)) {
+                if(!set) {
                     await deleteQuery.run(sensor, typeId);
                 }
-            } else if (set) {
+            } else if(set) {
                 await insert.run(sensor, typeId);
             }
         }
         await SensorManager.getInstance().updateSensors(sensor);
     }
 
-    private async ensureSensorIsPresent(sensorId: string){
-        if(!this.sensors.has(sensorId)){
-            this.sensors.add(sensorId);
-            await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id, label) VALUES (?, ?)", [sensorId, sensorId]);
-        }
-    }
-
-    public async setConfigurations(config: Config) {
-        /*
-        const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
-        const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
-        const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
-        for (let sensor of Object.keys(config)) {
-            await update.run(config[sensor].label, sensor);
-            let configuredTypes = await this.getTypesBySensorId(sensor);
-            for (let field of config[sensor].fields) {
-                let fieldName = field.name;
-                let fieldChecked = field.checked;
-                if (configuredTypes.includes(fieldName)) {
-                    if (!fieldChecked) {
-                        await deleteQuery.run(sensor, fieldName);
-                    }
-                } else if (fieldChecked) {
-                    await insert.run(sensor, fieldName);
-                }
-            }
-            SensorManager.getInstance().getSensor(sensor, {updateData: false, updateConfig: true});
-        }*/
-    }
-
     public generateUrlId(sensor: Sensor): string | null {
         let urlId = sensor.getUrlId();
-        if (urlId == null) {
+        if(urlId == null) {
             urlId = sensor.generateUrlId();
             SensorManager.getInstance().setUrlId(sensor.getId(), urlId);
             this.ensureSensorIsPresent(sensor.getId()).then(() =>
@@ -316,7 +287,7 @@ export class ConfigurationManager {
 
     public revokeUrlId(sensor: Sensor) {
         let urlId = sensor.getUrlId();
-        if (urlId != null) {
+        if(urlId != null) {
             sensor.revokeUrlId();
             SensorManager.getInstance().setUrlId(null, urlId);
             this.source.run(`UPDATE sensors SET url_id = NULL WHERE sensor_id = ?`, sensor.getId()).then();
@@ -327,7 +298,7 @@ export class ConfigurationManager {
         let newVar = await this.source.all<{ sensor_id: string, url_id: string }[]>(
             `SELECT sensor_id, url_id FROM "sensors"`
         ) ?? [];
-        return newVar.map(query => ({id: query.sensor_id, urlId: query.url_id}));
+        return newVar.map(query => ({ id: query.sensor_id, urlId: query.url_id }));
     }
 
     public async getConfiguration(sensorId: string | Sensor): Promise<ConfigurationSensor | null> {
@@ -335,7 +306,7 @@ export class ConfigurationManager {
         const labeledSensor = await this.source.get<{ sensor_id: string, label: string, url_id: string }>(
             `SELECT sensor_id, label, url_id FROM "sensors" WHERE sensor_id = ?`, sensor
         );
-        if (labeledSensor == undefined) {
+        if(labeledSensor == undefined) {
             return null;
         }
         const types = await this.source.all<{ type_id: string, label: string }[]>(
@@ -351,27 +322,23 @@ export class ConfigurationManager {
         }
     }
 
-    private static getSQLiteFile(path: string): string {
-        return fs.readFileSync(getSQLFile(path)).toString()
-    }
-
     public close() {
         this.source?.close();
     }
 
     public async getTypesBySensorId(sensorsId: string[]): Promise<{ [sensorId: string]: string[] }> {
-        if (sensorsId.length == 1) {
+        if(sensorsId.length == 1) {
             const sensor = sensorsId[0];
             return {
                 [sensor]: (await this.source.all<{ typeId: string }[]>(
                     `SELECT type_id AS typeId FROM "types_by_sensor" WHERE sensor_id = ?`, sensor))
                     .map((sensorId: { typeId: string }) => sensorId.typeId)
             };
-        } else if (sensorsId.length > 1) {
+        } else if(sensorsId.length > 1) {
             const typesBySensor = (await this.source.all<TypeBySensor[]>(
                 `SELECT sensor_id AS sensorId, group_concat(type_id) AS typesId FROM "types_by_sensor" GROUP BY sensor_id`))
                 .filter((sensor: TypeBySensor) => sensorsId.includes(sensor.sensorId))
-                .map((sensor: TypeBySensor) => ({...sensor, type_id: sensor.typesId.split(",")}));
+                .map((sensor: TypeBySensor) => ({ ...sensor, type_id: sensor.typesId.split(",") }));
 
             return typesBySensor.reduce((acc: { [sensorId: string]: string[] }, curr) => {
                 acc[curr.sensorId] = curr.type_id;
@@ -389,18 +356,18 @@ export class ConfigurationManager {
      * @param includeArgument Inclure dans le résultat les ids passés en argument, le résultat pourra contenir des labels nuls.
      */
     public async getLabelledDataTypes(ids?: string[], includeArgument?: boolean): Promise<{ id: string, label: string | null }[]> {
-        if (ids != null && ids.length == 1) {
+        if(ids != null && ids.length == 1) {
             return (await this.source.all<{ id: string, label: string | null }[]>(
                 `SELECT type_id AS id, label FROM "types" WHERE type_id = ?`, [ids[0]]));
         }
         let labeledTypes = (await this.source.all<{ id: string, label: string | null }[]>(
             `SELECT type_id AS id, label FROM "types"`));
-        if (ids != null) {
+        if(ids != null) {
             labeledTypes = labeledTypes.filter(type => ids.includes(type.id));
-            if (includeArgument) {
-                for (let id of ids) {
-                    if (labeledTypes.find(type => type.id === id) == null) {
-                        labeledTypes.push({id: id, label: null});
+            if(includeArgument) {
+                for(let id of ids) {
+                    if(labeledTypes.find(type => type.id === id) == null) {
+                        labeledTypes.push({ id: id, label: null });
                     }
                 }
             }
@@ -415,18 +382,25 @@ export class ConfigurationManager {
 
         let configuredTypes = (await this.getLabelledDataTypes(types.map(type => type.id), false))
             .map(labelledType => labelledType.id);
-        for (let field of types) {
-            if (configuredTypes.includes(field.id)) {
-                if (field.label == null) {
+        for(let field of types) {
+            if(configuredTypes.includes(field.id)) {
+                if(field.label == null) {
                     await remove.run(field.id);
                 } else {
                     await update.run(field.label, field.id);
                 }
-            } else if (field.label != null) {
+            } else if(field.label != null) {
                 await insert.run(field.id, field.label);
             }
         }
         SensorManager.getInstance().updateSensors().then();
+    }
+
+    private async ensureSensorIsPresent(sensorId: string) {
+        if(!this.sensors.has(sensorId)) {
+            this.sensors.add(sensorId);
+            await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id, label) VALUES (?, ?)", [sensorId, sensorId]);
+        }
     }
 
 }

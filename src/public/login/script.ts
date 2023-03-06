@@ -14,7 +14,7 @@
                 },
                 body: JSON.stringify(data)
             });
-            switch (response.status) {
+            switch(response.status) {
                 case 200:
                     input.classList.add("valid");
                     message.classList.add("valid");
@@ -25,10 +25,10 @@
                 default:
                     let responseData = await response.json();
                     input.classList.add("invalid");
-                    message.innerText = `${responseData.message??response.statusText}`;
+                    message.innerText = `${responseData.message ?? response.statusText}`;
                     message.classList.remove("hidden");
             }
-        } catch (error) {
+        } catch(error) {
             console.error(error);
             input.classList.add("invalid");
             message.innerText = "Une erreur s'est produite";
