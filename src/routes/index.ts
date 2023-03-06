@@ -1,11 +1,10 @@
 import express from "express";
 import sensors from "./sensors";
-import home from "./home";
 import config from "./config";
 import login from "./login";
 import password from "./password"
 import auth from "../controllers/auth";
-import { getPublic } from "../utils/path";
+import { getPublic, getView } from "../utils/path";
 
 const router = express.Router();
 
@@ -31,6 +30,16 @@ router.use(
 
 router.use("/sensors", express.static(getPublic("sensors")), sensors);
 
-router.use(express.static(getPublic("home")), home);
+router.use(express.static(getPublic("home")), async (req, res) => {
+    const pageTitle = "Page d'accueil projet QR Code";
+    let data: { title: string; data: any[] }[];
+    data = [{
+        title: "Utilisation",
+        data: ["L'objectif de ce site est de mettre à disposition au public les données des capteurs présents dans les différents bâtiments, à travers des QRCodes."]
+    }, {
+        title: "Auteurs: ", data: ["Benjamin LE CESNE", "Antoine LEFEBVRE"] },
+    ];
+    res.status(404).render(getView('home'), { home: pageTitle, data })
+});
 
 export default router;

@@ -9,16 +9,13 @@ html {
 }
 
 body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) fixed;
     background-size: 200% 200%;
     animation: gradient 30s ease infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-div {
     font-family: Helvetica, sans-serif;
 }
 
@@ -26,11 +23,11 @@ h3 {
     font-size: 1.5em;
 }
 
-body .container {
+body .tab {
     width: 75%;
 }
 
-.container {
+.tab {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
@@ -40,9 +37,7 @@ body .container {
     background-color: rgba(255, 255, 255, 0.6);
     border-radius: 10px;
     padding: 25px;
-    flex-basis: 0;
-    flex-grow: 1;
-    flex-shrink: 1;
+    flex: 1 1 0;
     margin: 15px;
     white-space: nowrap;
     text-align: center;
@@ -56,12 +51,11 @@ body .container {
 #sensor-name {
     padding: 5px;
     margin: 5px;
-    font-size: 3vmax;
     width: 75%;
+    font-size: 3vmax;
     white-space: break-spaces;
 }
 
-/* Animation de fond */
 @keyframes gradient {
     0% {
         background-position: 0 0;

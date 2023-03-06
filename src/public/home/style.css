@@ -26,11 +26,11 @@ h3 {
     font-size: 1.5em;
 }
 
-body .container {
+body .tab {
     width: 75%;
 }
 
-.container {
+.tab {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
@@ -40,11 +40,9 @@ body .container {
     background-color: rgba(255, 255, 255, 0.6);
     border-radius: 10px;
     padding: 25px;
-    flex-basis: 0;
     flex-grow: 1;
     flex-shrink: 1;
     margin: 15px;
-    white-space: nowrap;
     text-align: center;
     box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
     font-size: 2vmax;

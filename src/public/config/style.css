@@ -2,169 +2,34 @@ body {
     font-family: Helvetica, sans-serif;
 }
 
-.qr-container {
-    display: flex;
-    flex-direction: column;
-    box-shadow: rgba(0, 0, 0, 0.35) 0 2px 6px;
-    border-radius: 10px;
-    transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
-    padding: 10px;
-    margin: 10px;
-    position: relative;
-    top: 0;
-    flex: 1 1 0;
-    max-width: max-content;
-}
+/* Contenu d'un onglet */
 
-.qr-container:hover {
-    box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
-    top: -3px;
-    transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
-}
-
-.container {
+.tab {
     display: flex;
     flex-wrap: wrap;
     background-color: white;
     justify-content: center;
 }
 
-.input-data-type label {
-    display: inline-block;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    border-radius: 25px;
-    white-space: nowrap;
-    margin: 3px 0px;
-    transition: all .2s;
-    padding: 8px 12px;
-    cursor: pointer;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.input-data-type:hover label {
-    box-shadow: rgba(0, 0, 0, 0.35) 0 3px 8px;
-}
-
-.input-data-type label::before {
-    display: inline-block;
-    font-weight: 900;
-    font-size: 12px;
-    margin: 2px 6px 2px 2px;
-    content: "+";
-    transition: transform .3s ease-in-out;
-}
-
-.input-data-type input[type="checkbox"]:checked + label::before {
-    content: "\2713";
-    transform: scale(1.5) rotate(360deg);
-    transition: transform .3s ease-in-out;
-}
-
-.input-data-type input[type="checkbox"]:checked + label {
-    border: 2px solid #915cff;
-    background-color: #915cff;
-    color: #fff;
-    transition: all .2s;
-}
-
-.input-data-type input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-}
-
-.qr-container h3 {
-    white-space: nowrap;
-    text-align: center;
-    min-width: 200px;
-}
-
-.qr-container img {
-    width: 200px;
-    align-self: center;
-}
-
-.link-sensor {
-    align-self: center;
-}
-
-.form-change-label {
-    position: relative;
-    padding: 15px 0 0;
-    margin-top: 10px;
-}
-
-.form-change-label.for-type > .change-label {
-    min-width: 200px;
-    min-height: 100px;
-}
-
-.change-label {
-    font-family: inherit;
-    border: 0;
-    outline: 0;
-    font-size: 1.3rem;
-    padding: 7px 0 7px 10px;
-    margin-bottom: 10px;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    box-sizing: border-box;
-}
-
-.change-label::placeholder {
-    color: transparent;
-}
-
-.change-label:placeholder-shown ~ .change-label-label {
-    font-size: 1.3rem;
-    cursor: text;
-    top: 20px;
-    margin-left: 10px;
-    transition-property: top, margin-left, color, font;
-    transition-duration: 0.2s;
-}
-
-.change-label-label {
-    position: absolute;
-    top: 0;
-    display: block;
-    font-size: 1rem;
-    color: #9b9b9b;
-}
-
-.change-label:focus {
-    padding-bottom: 6px;
-    border-bottom: 3px solid;
-    border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
-    margin-bottom: 8px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-
-.change-label:focus.modified {
-    border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
-}
-
-.change-label.validated {
-    border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
-}
-
-.change-label:focus ~ .change-label-label {
-    top: 0;
-    font-size: 1rem;
-    margin-left: 0;
-    color: #915cff;
-    font-weight: 700;
-}
-
-/* reset input */
-.change-label:required, .change-label:invalid {
-    box-shadow: none;
-}
-
-input[type=radio] {
+.menu > input[type=radio] {
     display: none;
+}
+
+.menu > div {
+    display: inline;
+    position: absolute;
+    right: 0;
+    transform: translate(0, 50%) translate(0, -4px);
+}
+
+.menu button {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
 .main {
@@ -213,17 +78,169 @@ input:hover + .label-page {
     width: 100%;
 }
 
-.hidden {
-    display: none !important;
+
+/* Conteneur où sont affichés les QRCodes et les labels */
+
+.box {
+    position: relative;
+    top: 0;   display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    max-width: max-content;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0 2px 6px;
+    border-radius: 10px;
+    transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
 }
 
-.clickable {
-    cursor: pointer;
+.box:hover {
+    top: -3px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
+    transition: box-shadow 0.3s ease-in-out, top 0.3s ease-in-out;
 }
 
-.qr-container.selected {
+.box h3 {
+    white-space: nowrap;
+    text-align: center;
+    min-width: 200px;
+}
+
+.box img {
+    width: 200px;
+    align-self: center;
+}
+
+.box.selected {
     background-color: #89e989;
 }
+
+/* Bouton pour afficher ou non un type de données */
+.config-data-type input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+}
+
+/* Texte affiché dans le bouton pour afficher ou non un type de données */
+.config-data-type label {
+    display: inline-block;
+    width: 100%;
+    margin: 3px 0;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 25px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.config-data-type:hover label {
+    box-shadow: rgba(0, 0, 0, 0.35) 0 3px 8px;
+}
+
+.config-data-type label::before {
+    display: inline-block;
+    margin: 2px 6px 2px 2px;
+    font-weight: 900;
+    font-size: 12px;
+    content: "+";
+    transition: transform .3s ease-in-out;
+}
+
+.config-data-type input[type="checkbox"]:checked + label {
+    border: 2px solid #915cff;
+    background-color: #915cff;
+    color: #fff;
+    transition: all .2s;
+}
+
+.config-data-type input[type="checkbox"]:checked + label::before {
+    content: "\2713";
+    transform: scale(1.5) rotate(360deg);
+    transition: transform .3s ease-in-out;
+}
+
+/* Lien vers le capteur */
+.link-sensor {
+    align-self: center;
+}
+
+/* Champ d'édition des labels */
+.edit-text {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+}
+
+.edit-text > textarea {
+    padding: 7px 0 7px 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    background-color: #f0f0f0;
+    outline: 0;
+    border: 0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1.3rem;
+}
+
+.edit-text > textarea:focus {
+    padding-bottom: 6px;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(to right, #7f41ff, #c5abff) 1;
+    margin-bottom: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.edit-text > textarea::placeholder {
+    color: transparent;
+}
+
+.edit-text.for-type > textarea {
+    min-width: 200px;
+    min-height: 100px;
+}
+
+.edit-text > textarea:focus.modified {
+    border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
+}
+
+.edit-text > textarea.validated {
+    border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
+}
+
+.edit-text > textarea:focus ~ .change-label-label {
+    top: 0;
+    font-size: 1rem;
+    margin-left: 0;
+    color: #915cff;
+    font-weight: 700;
+}
+
+.edit-text > label {
+    position: absolute;
+    top: 0;
+    display: block;
+    font-size: 1rem;
+    color: #9b9b9b;
+}
+
+.edit-text > textarea:placeholder-shown ~ label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+    margin-left: 10px;
+    transition-property: top, margin-left, color, font;
+    transition-duration: 0.2s;
+}
+
+.edit-text > textarea:required, .edit-text > textarea:invalid {
+    box-shadow: none;
+}
+
+/* Bouton avec flèche */
 
 .button-slider {
     position: relative;
@@ -324,24 +341,22 @@ input:hover + .label-page {
     color: #fff;
 }
 
-/* The Modal (background) */
-.modal {
-    display: none; /* Hidden by default */
-    align-items: center;
-    justify-content: center;
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+/* Fenêtre de confirmation */
+.confirm {
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0); /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Modal Content/Box */
-.modal-content {
+.confirm > div {
     padding: 30px 30px;
     display: flex;
     flex-direction: column;
@@ -352,23 +367,24 @@ input:hover + .label-page {
     border-top: 20px solid #d85261;
 }
 
-.confirm-title {
+.confirm h3 {
     font-weight: 700;
     font-size: 20px;
     margin-bottom: 35px;
+    margin-top: 0;
     align-self: center;
     text-align: center;
     box-sizing: border-box;
 }
 
-.confirm-text {
+.confirm span {
     text-align: center;
     margin-bottom: 35px;
     align-self: center;
     box-sizing: border-box;
 }
 
-.modal-button {
+.confirm button {
     padding-right: 20px;
     padding-left: 20px;
     height: 35px;
@@ -377,7 +393,6 @@ input:hover + .label-page {
     border: none;
     cursor: pointer;
 }
-
 
 .confirm-button {
     background: #779ecb;
@@ -392,20 +407,11 @@ input:hover + .label-page {
     display: none;
 }
 
-.menu-buttons {
-    display: inline;
-    position: absolute;
-    right: 0;
-    transform: translate(0, 50%) translate(0, -4px);
+.hidden {
+    display: none !important;
 }
 
-.menu-button {
-    color: #fff;
-    font-size: 16px;
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
+.clickable {
     cursor: pointer;
 }
 

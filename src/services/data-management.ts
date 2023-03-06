@@ -460,7 +460,7 @@ export class ConfigurationManager {
     private async ensureSensorIsPresent(sensorId: string) {
         if(!this.sensors.has(sensorId)) {
             this.sensors.add(sensorId);
-            await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id, label) VALUES (?, ?)", [sensorId, sensorId]);
+            await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id) VALUES (?)", [sensorId]);
         }
     }
 
