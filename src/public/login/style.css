@@ -51,7 +51,6 @@ input[type="password"] {
 
 /* Définition des styles pour le bouton de soumission */
 button[type="submit"] {
-  border: 2px solid #915cff;
   background-color: #915cff;
   color: #fff;
   font-size: 16px;
@@ -60,7 +59,6 @@ button[type="submit"] {
   border-radius: 10px;
   padding: 10px 20px;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
 }
 
 /* Définition des styles pour le message d'erreur */

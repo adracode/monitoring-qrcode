@@ -369,13 +369,15 @@ input:hover + .label-page {
 }
 
 .modal-button {
-    min-width: 100px;
+    padding-right: 20px;
+    padding-left: 20px;
     height: 35px;
     border-radius: 20px;
     color: white;
     border: none;
     cursor: pointer;
 }
+
 
 .confirm-button {
     background: #779ecb;
@@ -390,10 +392,21 @@ input:hover + .label-page {
     display: none;
 }
 
-.disconnect-button {
+.menu-buttons {
+    display: inline;
     position: absolute;
     right: 0;
     transform: translate(0, 50%) translate(0, -4px);
+}
+
+.menu-button {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
 @media print {

@@ -8,9 +8,9 @@ function changePasswordInRunningConfig(newHash: string){
 
 function changePasswordInFile(newHash: string){
     try {
-        var jsonString = JSON.parse(fs.readFileSync("config.json", "utf-8"));
+        let jsonString = JSON.parse(fs.readFileSync("config.json", "utf-8"));
         jsonString.adminPassword = newHash;
-        fs.writeFileSync("config.json", JSON.stringify(jsonString));
+        fs.writeFileSync("config.json", JSON.stringify(jsonString, null, 4));
     } catch (e) {
         throw(e);
     }

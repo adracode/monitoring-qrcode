@@ -335,6 +335,12 @@ for(let disconnect of document.querySelectorAll(".disconnect-button")){
     });
 }
 
+for(let disconnect of document.querySelectorAll(".change-password-button")){
+    disconnect.addEventListener("click", async (event) => {
+        window.location.href = "/password";
+    });
+}
+
 for (let printButton of document.querySelectorAll(".print-qrcodes")) {
     printButton.addEventListener("click", (event) => {
         let printed = initPrint(Array.prototype.slice.call(document.querySelectorAll(".selected > .qr-code-svg")).map(img => ({
