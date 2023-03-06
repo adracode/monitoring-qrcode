@@ -17,4 +17,5 @@ const port = Number(process.env.PORT) || 3000;
     process.on('exit', () => ConfigurationManager.getInstance().close());
 })();
 
+//Supprimer tous les tokens invalides.
 setInterval(() => TokenManager.getInstance().deleteInvalidToken(), Sensor.getSetting<number>("deleteTokenInterval"));

@@ -14,12 +14,14 @@ router.use(
     express.static(getPublic("login"), { extensions: ["html"] }),
     login
 );
+
 router.use(
     "/password",
     auth,
     express.static(getPublic("password"), { extensions: ["html"] }),
     password
-)
+);
+
 router.use(
     "/config",
     auth,
@@ -27,8 +29,8 @@ router.use(
     config
 );
 
-router.use("/", express.static(getPublic("home")), home);
-
 router.use("/sensors", express.static(getPublic("sensors")), sensors);
+
+router.use(express.static(getPublic("home")), home);
 
 export default router;

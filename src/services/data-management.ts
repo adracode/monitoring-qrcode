@@ -5,12 +5,19 @@ import { ConfigurationSensor, Sensor, SensorsData } from "./sensor"
 import { getSQLFile } from "../utils/path"
 import * as fs from "fs";
 
+/**
+ * Représente le résultat de la requête pour obtenir tous les noms des capteurs d'Influx.
+ */
 type SensorName = { name: string };
+
+/**
+ * Représente le résultat de la requête pour ovtenir toutes les données d'un capteur d'Influx.
+ */
 type RawData = {
     time?: { getNanoTime: () => number },
     [type: string]: any
 }
-type Config = { [id: string]: { label: string, fields: [{ name: string, checked: boolean }] } }
+
 type RawResults = {
     results: {
         statement_id: number,
@@ -23,7 +30,8 @@ type RawResults = {
 };
 
 /**
- * Indique si l'on veut les dernières données de la base de données
+ * Indique si l'on veut les dernières données de la base de données.
+ * On ne peut pas avoir en même temps forceUpdateData à true et updateData à false.
  */
 type GetSensorOptions = {
     updateConfig?: boolean,
@@ -40,6 +48,10 @@ type GetSensorOptions = {
     forceUpdateData?: false
 })
 
+/**
+ * Gère les données de la BDD Influx.
+ * Cette classe est un singleton, pour l'initialiser, il faut appeler SensorManager.init(), puis on peut récupérer l'instance avec SensorManager.getInstance().
+ */
 export class SensorManager {
 
     private static instance: SensorManager;
@@ -52,8 +64,9 @@ export class SensorManager {
         username: process.env.INFLUXDB_USERNAME,
         password: process.env.INFLUXDB_PASSWORD
     });
-    private sensorsByUrl: Map<string, Sensor> = new Map<string, Sensor>();
-    private urlIds: Map<string, string> = new Map<string, string>();
+
+    private sensorsById: Map<string, Sensor> = new Map<string, Sensor>();
+    private sensorsByUrl: Map<string, string> = new Map<string, string>();
 
     private constructor() {
     }
@@ -70,13 +83,12 @@ export class SensorManager {
     }
 
     /**
-     * Assainit une séquence afin d'éviter les injections SQL, en n'autorisant que les caractères alphanumériques et les tirets / underscores.
-     * Deux tirets étant un commentaire, il faut utiliser le résultat de cette méthode entre guillements dans la requête.
-     * @param input La séquence à assainir.
-     * @private
+     * Initialise l'instance en récupérant toutes les URLs des capteurs.
      */
-    private static sanitize(input: string): string {
-        return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
+    public async init() {
+        for(let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
+            this.setUrlId(sensorId.id, sensorId.urlId);
+        }
     }
 
     /**
@@ -86,28 +98,22 @@ export class SensorManager {
         return (await this.source.query<SensorName>(`SHOW MEASUREMENTS`)).map(sensor => sensor.name);
     }
 
-    public async init() {
-        for(let sensorId of (await ConfigurationManager.getInstance().getUrlIds())) {
-            this.setUrlId(sensorId.id, sensorId.urlId);
-        }
-    }
-
-    public setUrlId(sensor: string | null, urlId: string) {
-        if(sensor != null) {
-            this.urlIds.set(urlId, sensor);
-        } else {
-            this.urlIds.delete(urlId);
-        }
+    /**
+     * Renvoie tous les capteurs de la base Influx
+     * @param options Options de mise à jour
+     */
+    public async getSensors(options?: GetSensorOptions): Promise<Sensor[]> {
+        return await Promise.all((await this.getSensorsId())
+            .map(async (sensorId: string) => (await this.getSensor(sensorId, options))!))
     }
 
     /**
-     * Renvoie l'ID du capteur utilisé dans l'URL pour afficher ses données.
+     * Renvoie l'ID du capteur à partir de son URL.
      * Si le capteur n'existe pas, renvoie null.
-     * Cet ID est un nombre généré aléatoirement en base64 (avec '-' et '_')
-     * @param sensorUrlId L'ID ou le capteur dont on veut l'ID d'URL.
+     * @param sensorUrl L'URL du capteur
      */
-    public async getSensorFromURL(sensorUrlId: string): Promise<Sensor | null> {
-        let sensorId = this.urlIds.get(sensorUrlId);
+    public async getSensorByURL(sensorUrl: string): Promise<Sensor | null> {
+        let sensorId = this.sensorsByUrl.get(sensorUrl);
         return sensorId != null ? this.getSensor(sensorId) : null;
     }
 
@@ -121,30 +127,25 @@ export class SensorManager {
      */
     public async getSensor(id: string, options?: GetSensorOptions): Promise<Sensor | null> {
         id = SensorManager.sanitize(id);
-        let sensor: Sensor = this.sensorsByUrl.get(id) ?? new Sensor(id);
+        let sensor: Sensor = this.sensorsById.get(id) ?? new Sensor(id);
         if(options?.forceUpdateData || ((options?.updateData ?? true) && sensor.needUpdate())) {
-            const data = (await this.getDatabaseSensorData(id));
+            const data = await this.getDatabaseSensorData(id);
             sensor.setData(data.dateOfData, data.data);
             if(sensor.isEmpty()) {
                 return null;
             }
-            if(!this.sensorsByUrl.has(id)) {
-                this.sensorsByUrl.set(id, sensor);
+            if(!this.sensorsById.has(id)) {
+                this.sensorsById.set(id, sensor);
             }
         }
         if((options?.updateConfig ?? false) || !sensor.hasConfig()) {
-            sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor)) ?? {})
+            sensor.setConfiguration((await ConfigurationManager.getInstance().getConfiguration(sensor.getId())) ?? {})
         }
         return sensor;
     }
 
-    public async getSensors(options?: GetSensorOptions): Promise<Sensor[]> {
-        return await Promise.all((await this.getSensorsId())
-            .map(async (sensorId: string) => (await this.getSensor(sensorId, options))!))
-    }
-
     /**
-     * Renvoie un dictionnaire contenant les noms des capteurs avec les types de données qu'ils affichent.
+     * Renvoie un dictionnaire contenant les noms des capteurs avec tous les types de données qu'ils affichent ou non.
      */
     public async getSensorsConfig(): Promise<{ [sensorId: string]: { dataType: string, isDisplayed: boolean }[] }> {
         let tables = (await this.source.queryRaw(`SHOW FIELD KEYS`) as RawResults).results[0].series;
@@ -164,6 +165,9 @@ export class SensorManager {
         }, {});
     }
 
+    /**
+     * Renvoie tous les types de données présents dans Influx (ex: co2, temp, light...).
+     */
     public async getAllDataTypes(): Promise<string[]> {
         return (await this.source.query<{ fieldKey: string }>(`SHOW FIELD KEYS`))
             .reduce((acc: string[], cur) => {
@@ -174,9 +178,26 @@ export class SensorManager {
             }, []);
     }
 
+    /**
+     * Mettre à jour la configuration des capteurs.
+     * @param ids Les capteurs à mettre à jour, vide pour tout selectionner
+     */
     public async updateSensors(...ids: string[]) {
         for(let sensor of ids.length == 0 ? await this.getSensorsId() : ids) {
             this.getSensor(sensor, { updateData: false, updateConfig: true }).then();
+        }
+    }
+
+    /**
+     * Associe ou dissocie une URL avec un capteur.
+     * @param sensor L'ID du capteur
+     * @param urlId l'URL utilisé
+     */
+    public setUrlId(sensor: string | null, urlId: string) {
+        if(sensor != null) {
+            this.sensorsByUrl.set(urlId, sensor);
+        } else {
+            this.sensorsByUrl.delete(urlId);
         }
     }
 
@@ -197,12 +218,37 @@ export class SensorManager {
             }))
         };
     }
+
+
+    /**
+     * Assainit une séquence afin d'éviter les injections SQL, en n'autorisant que les caractères alphanumériques et les tirets / underscores.
+     * Deux tirets étant un commentaire, il faut utiliser le résultat de cette méthode entre guillements dans la requête.
+     * @param input La séquence à assainir
+     * @private
+     */
+    private static sanitize(input: string): string {
+        return input.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 50);
+    }
 }
 
 type TypeBySensor = { sensorId: string; typesId: string };
 
+type SensorConfig = {
+    sensorId: string,
+    types?: {
+        id: string,
+        display: boolean
+    }[],
+    label?: string | null
+}
+
+/**
+ * Gère la configuration des capteurs
+ * Cette classe est un singleton, pour l'initialiser, il faut appeler ConfigurationManager.init(), puis on peut récupérer l'instance avec ConfigurationManager.getInstance().
+ */
 export class ConfigurationManager {
     private static instance: ConfigurationManager;
+
     private readonly source: sqlite.Database;
     private sensors: Set<string> = new Set<string>();
 
@@ -218,8 +264,7 @@ export class ConfigurationManager {
     }
 
     /**
-     * Ouvre la base de données de configuration et créer les tables si nécessaire.
-     * @public
+     * Initialise la connexion à la base de données et créer les tables si nécessaire.
      */
     public static async init() {
         if(this.instance != null) {
@@ -229,51 +274,73 @@ export class ConfigurationManager {
             filename: process.env.CONFIG_DATABASE as string,
             driver: wrapped.Database
         });
-        await database.exec(ConfigurationManager.getSQLiteFile("create-config.sql"));
+        await database.exec(ConfigurationManager.getSQLiteFileContent("create-config.sql"));
         this.instance = new ConfigurationManager(database);
     }
 
-    private static getSQLiteFile(path: string): string {
-        return fs.readFileSync(getSQLFile(path)).toString()
-    }
-
+    /**
+     * Initialise la classe.
+     */
     public async init() {
         (await this.source.all<{ sensorId: string }[]>(
             `SELECT sensor_id AS sensorId FROM "sensors"`)).map(sensor => sensor.sensorId)
             .forEach(sensor_id => this.sensors.add(sensor_id));
     }
 
-    public async setConfiguration(config: {
-        sensorId: string,
-        types?: {
-            id: string,
-            set: boolean
-        }[],
-        label?: string | null
-    }) {
-        await this.ensureSensorIsPresent(config.sensorId);
+    /**
+     * Renvoie la configuration actuelle d'un capteur.
+     * @param sensorId L'ID du capteur dont on veut la configuration
+     */
+    public async getConfiguration(sensorId: string): Promise<ConfigurationSensor | null> {
+        const labeledSensor = await this.source.get<{ sensorId: string, label: string, urlId: string }>(
+            `SELECT sensor_id as sensorId, label, url_id as urlId FROM sensors WHERE sensor_id = ?`, sensorId
+        );
+        if(labeledSensor == null) {
+            return null;
+        }
+        const types = await this.source.all<{ typeId: string, label: string }[]>(
+            `SELECT types_by_sensor.type_id as typeId, label FROM types_by_sensor LEFT JOIN types ON types_by_sensor.type_id = types.type_id WHERE sensor_id = ?`, sensorId
+        );
+        return {
+            label: labeledSensor.label ?? labeledSensor.sensorId,
+            urlId: labeledSensor.urlId,
+            type: types.reduce((acc: { [type: string]: string }, curr: { typeId: string, label: string }) => {
+                acc[curr.typeId] = curr.label ?? curr.typeId;
+                return acc;
+            }, {})
+        }
+    }
+
+    /**
+     * Changer la configuration d'un capteur: son label et les types de données qu'il affiche.
+     * @param newConfiguration Le changement de configuration
+     */
+    public async setConfiguration(newConfiguration: SensorConfig) {
+        await this.ensureSensorIsPresent(newConfiguration.sensorId);
         const deleteQuery = await this.source.prepare("DELETE FROM types_by_sensor WHERE sensor_id = ? AND type_id = ?");
-        const insert = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
-        const sensor = config.sensorId;
-        if(config.label != null) {
-            const update = await this.source.prepare("UPDATE sensors SET label = ? WHERE sensor_id = ?");
-            await update.run(config.label, sensor);
+        const insertQuery = await this.source.prepare("INSERT INTO types_by_sensor (sensor_id, type_id) VALUES (?, ?)");
+        const sensor = newConfiguration.sensorId;
+        if(newConfiguration.label != null) {
+            await this.source.run("UPDATE sensors SET label = ? WHERE sensor_id = ?", [newConfiguration.label, sensor]);
         }
         let configuredTypes = (await this.getTypesBySensorId([sensor]))[sensor];
-        for(let type of config.types ?? []) {
-            let typeId = type.id;
-            let set = type.set;
-            if(configuredTypes.includes(typeId)) {
-                if(!set) {
-                    await deleteQuery.run(sensor, typeId);
+        for(let typeUpdate of newConfiguration.types ?? []) {
+            if(configuredTypes.includes(typeUpdate.id)) {
+                if(!typeUpdate.display) {
+                    await deleteQuery.run(sensor, typeUpdate.id);
                 }
-            } else if(set) {
-                await insert.run(sensor, typeId);
+            } else if(typeUpdate.display) {
+                await insertQuery.run(sensor, typeUpdate.id);
             }
         }
         await SensorManager.getInstance().updateSensors(sensor);
     }
 
+    /**
+     * Générer l'URL d'un capteur s'il n'en a pas déjà une.
+     * Renvoie l'actuelle s'il en existe une.
+     * @param sensor Le capteur dont on veut l'URL.
+     */
     public generateUrlId(sensor: Sensor): string | null {
         let urlId = sensor.getUrlId();
         if(urlId == null) {
@@ -285,6 +352,10 @@ export class ConfigurationManager {
         return urlId;
     }
 
+    /**
+     * Révoquer l'URL d'un capteur, les QRCodes associés ne fonctionneront plus.
+     * @param sensor Le capteur dont on veut révoquer l'URL
+     */
     public revokeUrlId(sensor: Sensor) {
         let urlId = sensor.getUrlId();
         if(urlId != null) {
@@ -294,6 +365,9 @@ export class ConfigurationManager {
         }
     }
 
+    /**
+     * Renvoie les URLs de tous les capteurs.
+     */
     public async getUrlIds(): Promise<{ id: string, urlId: string }[]> {
         let newVar = await this.source.all<{ sensor_id: string, url_id: string }[]>(
             `SELECT sensor_id, url_id FROM "sensors"`
@@ -301,42 +375,21 @@ export class ConfigurationManager {
         return newVar.map(query => ({ id: query.sensor_id, urlId: query.url_id }));
     }
 
-    public async getConfiguration(sensorId: string | Sensor): Promise<ConfigurationSensor | null> {
-        const sensor = sensorId instanceof Sensor ? sensorId.getId() : sensorId;
-        const labeledSensor = await this.source.get<{ sensor_id: string, label: string, url_id: string }>(
-            `SELECT sensor_id, label, url_id FROM "sensors" WHERE sensor_id = ?`, sensor
-        );
-        if(labeledSensor == undefined) {
-            return null;
-        }
-        const types = await this.source.all<{ type_id: string, label: string }[]>(
-            `SELECT types_by_sensor.type_id, label FROM "types_by_sensor" LEFT JOIN "types" ON types_by_sensor.type_id = types.type_id WHERE sensor_id = ?`, sensor
-        );
-        return {
-            label: labeledSensor.label ?? labeledSensor.sensor_id,
-            urlId: labeledSensor.url_id,
-            type: types.reduce((acc: { [type: string]: string }, curr: { type_id: string, label: string }) => {
-                acc[curr.type_id] = curr.label ?? curr.type_id;
-                return acc;
-            }, {})
-        }
-    }
-
-    public close() {
-        this.source?.close();
-    }
-
+    /**
+     * Renvoie les types de données que chaque capteur affiche.
+     * @param sensorsId Les IDs des capteurs dont on veut les types de données
+     */
     public async getTypesBySensorId(sensorsId: string[]): Promise<{ [sensorId: string]: string[] }> {
         if(sensorsId.length == 1) {
             const sensor = sensorsId[0];
             return {
                 [sensor]: (await this.source.all<{ typeId: string }[]>(
-                    `SELECT type_id AS typeId FROM "types_by_sensor" WHERE sensor_id = ?`, sensor))
-                    .map((sensorId: { typeId: string }) => sensorId.typeId)
+                    `SELECT type_id AS typeId FROM types_by_sensor WHERE sensor_id = ?`, sensor))
+                    .map((sensor: { typeId: string }) => sensor.typeId)
             };
         } else if(sensorsId.length > 1) {
             const typesBySensor = (await this.source.all<TypeBySensor[]>(
-                `SELECT sensor_id AS sensorId, group_concat(type_id) AS typesId FROM "types_by_sensor" GROUP BY sensor_id`))
+                `SELECT sensor_id AS sensorId, group_concat(type_id) AS typesId FROM types_by_sensor GROUP BY sensor_id`))
                 .filter((sensor: TypeBySensor) => sensorsId.includes(sensor.sensorId))
                 .map((sensor: TypeBySensor) => ({ ...sensor, type_id: sensor.typesId.split(",") }));
 
@@ -347,13 +400,12 @@ export class ConfigurationManager {
         } else {
             return {}
         }
-
     }
 
     /**
      * Renvoie tous les types de données avec leurs labels présents dans la configuration.
-     * @param ids Filtrer les types retournés, seuls les ids présents dans ce tableau sont renvoyés avec leur label.
-     * @param includeArgument Inclure dans le résultat les ids passés en argument, le résultat pourra contenir des labels nuls.
+     * @param ids Filtrer les types retournés, seuls les ids présents dans ce tableau sont renvoyés avec leur label
+     * @param includeArgument Inclure dans le résultat les ids passés en argument, le résultat pourra contenir des labels nuls
      */
     public async getLabelledDataTypes(ids?: string[], includeArgument?: boolean): Promise<{ id: string, label: string | null }[]> {
         if(ids != null && ids.length == 1) {
@@ -375,32 +427,57 @@ export class ConfigurationManager {
         return labeledTypes;
     }
 
+    /**
+     * Mettre à jour les labels des types de données
+     * @param types
+     */
     public async setLabelTypes(types: { id: string, label: string | null }[]) {
-        const update = await this.source.prepare("UPDATE types SET label = ? WHERE type_id = ?");
-        const insert = await this.source.prepare("INSERT INTO types (type_id, label) VALUES (?, ?)");
-        const remove = await this.source.prepare("DELETE FROM types WHERE type_id = ?");
+        const updateQuery = await this.source.prepare("UPDATE types SET label = ? WHERE type_id = ?");
+        const insertQuery = await this.source.prepare("INSERT INTO types (type_id, label) VALUES (?, ?)");
+        const removeQuery = await this.source.prepare("DELETE FROM types WHERE type_id = ?");
 
         let configuredTypes = (await this.getLabelledDataTypes(types.map(type => type.id), false))
             .map(labelledType => labelledType.id);
         for(let field of types) {
             if(configuredTypes.includes(field.id)) {
                 if(field.label == null) {
-                    await remove.run(field.id);
+                    await removeQuery.run(field.id);
                 } else {
-                    await update.run(field.label, field.id);
+                    await updateQuery.run(field.label, field.id);
                 }
             } else if(field.label != null) {
-                await insert.run(field.id, field.label);
+                await insertQuery.run(field.id, field.label);
             }
         }
         SensorManager.getInstance().updateSensors().then();
     }
 
+    /**
+     * Garantir qu'un ID de capteur soit bien présent dans la base de données.
+     * @param sensorId L'ID du capteur
+     * @private
+     */
     private async ensureSensorIsPresent(sensorId: string) {
         if(!this.sensors.has(sensorId)) {
             this.sensors.add(sensorId);
             await this.source.run("INSERT OR IGNORE INTO sensors (sensor_id, label) VALUES (?, ?)", [sensorId, sensorId]);
         }
+    }
+
+    /**
+     * Renvoie le contenu d'un fichier SQL.
+     * @param path Le chemin du fichier dans le dossier 'sql'
+     * @private
+     */
+    private static getSQLiteFileContent(path: string): string {
+        return fs.readFileSync(getSQLFile(path)).toString()
+    }
+
+    /**
+     * Ferme la connexion avec la base de données.
+     */
+    public close() {
+        this.source?.close();
     }
 
 }

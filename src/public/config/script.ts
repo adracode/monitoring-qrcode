@@ -27,7 +27,7 @@ for(let setType of document.getElementsByClassName("set-data-type")) {
             body: JSON.stringify({
                 sensorId: identifier[0],
                 typeId: identifier[1],
-                set: checkBox.checked
+                display: checkBox.checked
             }),
         });
         (setType as HTMLInputElement).disabled = false;

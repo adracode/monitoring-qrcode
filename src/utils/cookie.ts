@@ -1,5 +1,9 @@
 import { TokenManager } from "../services/token";
 
+/**
+ * Récupérer le token d'authentification à partir de la base de données des cookies.
+ * @param headerCookie
+ */
 export function getAuthCookie(headerCookie: string | undefined): { hasAuthCookie: boolean, authCookie: string } {
     const cookies = headerCookie?.trim().split(';')
     for(const cookie of cookies ?? []) {

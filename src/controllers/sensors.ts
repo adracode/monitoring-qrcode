@@ -4,9 +4,14 @@ import { format } from '../utils/string';
 import { getView } from '../utils/path';
 import { SensorsData } from '../services/sensor';
 
+/**
+ * Page pour afficher les données d'un capteur.
+ * @param req
+ * @param res
+ */
 async function showData(req: express.Request, res: express.Response) {
     const sensorId: string = req.params.sensor;
-    const sensor = await SensorManager.getInstance().getSensorFromURL(sensorId)
+    const sensor = await SensorManager.getInstance().getSensorByURL(sensorId)
 
     function sendData(title: string, data: { title: string; data: any }[]) {
         res.status(200).render(getView('data'), { sensor: title, data });

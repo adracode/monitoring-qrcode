@@ -3,6 +3,11 @@ import { TokenManager } from "../services/token";
 
 const { changePasswordFromWeb } = require("../services/password");
 
+/**
+ * Changer le mot de passe administrateur.
+ * @param req
+ * @param res
+ */
 async function changePassword(req: express.Request, res: express.Response) {
     const newPassword = req.body?.password;
     const confirmPassword = req.body?.confirmPassword;

@@ -3,6 +3,11 @@ import crypto from "crypto";
 import { TokenManager } from "../services/token";
 import { Sensor } from "../services/sensor";
 
+/**
+ * Se connecter.
+ * @param req
+ * @param res
+ */
 async function logIn(req: express.Request, res: express.Response) {
     const hash = crypto.createHash('sha256').update(req.body?.password).digest('hex');
     const hashPassword = Sensor.getSetting<string>("adminPassword")?.toLowerCase();

@@ -1,6 +1,9 @@
 import crypto from "crypto";
 import { Sensor } from "./sensor";
 
+/**
+ * Gestion de l'authentification admin.
+ */
 export class TokenManager {
     private static instance: TokenManager
 
@@ -20,12 +23,19 @@ export class TokenManager {
         this.instance = new TokenManager();
     }
 
+    /**
+     * Créer un token d'authentification.
+     */
     public createToken(): string {
         const token = crypto.randomBytes(33).toString("base64url");
         this.tokens.set(token, Date.now() + Sensor.getSetting<number>("tokenExpirationTime"));
         return token;
     }
 
+    /**
+     * Vérifier que le token est valide.
+     * @param token
+     */
     public isValid(token: string): boolean {
         if(this.tokens.has(token)) {
             if(Date.now() < this.tokens.get(token)!) {
@@ -39,14 +49,25 @@ export class TokenManager {
         }
     }
 
+    /**
+     * Supprimer un token.
+     * L'utilisateur connecté avec ce token sera déconnecté.
+     * @param token
+     */
     public deleteToken(token: string) {
         this.tokens.delete(token);
     }
 
+    /**
+     * Supprimer tous les tokens.
+     */
     public deleteAllTokens() {
         this.tokens.clear();
     }
 
+    /**
+     * Supprimer tous les tokens invalides.
+     */
     public deleteInvalidToken() {
         for(const token of this.tokens.keys()) {
             if(Date.now() > this.tokens.get(token)!) {

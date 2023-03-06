@@ -8,6 +8,8 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(routes);
 
+//Configurations
+
 dotenv.config();
 try {
     Object.entries(JSON.parse(fs.readFileSync("config.json", "utf-8")))

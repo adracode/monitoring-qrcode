@@ -8,7 +8,7 @@ import { TokenManager } from "../services/token";
 type NewSensorConfig = {
     sensorId: string;
     typeId?: string;
-    set?: boolean;
+    display?: boolean;
     label?: string | null;
 }
 
@@ -17,16 +17,18 @@ type NewTypeConfig = {
     label?: string;
 }
 
+/**
+ * Page de configuration des capteurs.
+ * @param req
+ * @param res
+ */
 async function configPage(req: express.Request, res: express.Response) {
     const sensors = SensorManager.getInstance();
     const configurations = ConfigurationManager.getInstance();
-    const config: { [p: string]: { dataType: string; isDisplayed: boolean }[] } =
-        await sensors.getSensorsConfig();
+    const config: { [p: string]: { dataType: string; isDisplayed: boolean }[] } = await sensors.getSensorsConfig();
     res.status(200).render(getView("config"), {
-        sensors: await Promise.all(
-            (
-                await sensors.getSensors({ updateData: false })
-            ).map(async (sensor) => ({
+        sensors: await Promise.all((await sensors.getSensors({ updateData: false }))
+            .map(async (sensor) => ({
                 name: sensor.getId(),
                 label: sensor.getRawTitle(),
                 types: config[sensor.getId()],
@@ -39,6 +41,11 @@ async function configPage(req: express.Request, res: express.Response) {
     });
 }
 
+/**
+ * Envoyer les QRCodes sous forme de SVG.
+ * @param req
+ * @param res
+ */
 async function getQRCodes(req: express.Request, res: express.Response) {
     let sensors = await SensorManager.getInstance().getSensors({
         updateData: false,
@@ -61,19 +68,29 @@ async function getQRCodes(req: express.Request, res: express.Response) {
     res.status(200).json(qrCodes);
 }
 
+/**
+ * Changer la configuration d'un capteur.
+ * @param req
+ * @param res
+ */
 async function setConfiguration(req: express.Request, res: express.Response) {
     const data: NewSensorConfig = req.body;
     await ConfigurationManager.getInstance().setConfiguration({
         sensorId: data.sensorId,
         types:
-            data.set != null && data.typeId != null
-                ? [{ set: data.set, id: data.typeId }]
+            data.display != null && data.typeId != null
+                ? [{ display: data.display, id: data.typeId }]
                 : undefined,
         label: data.label,
     });
     res.status(200).send();
 }
 
+/**
+ * Changer le label d'un type de données.
+ * @param req
+ * @param res
+ */
 async function setTypeLabel(req: express.Request, res: express.Response) {
     const data: NewTypeConfig = req.body;
     await ConfigurationManager.getInstance().setLabelTypes([{
@@ -84,11 +101,21 @@ async function setTypeLabel(req: express.Request, res: express.Response) {
     res.status(200).send();
 }
 
+/**
+ * Envoyer tous les capteurs sous forme d'ID.
+ * @param req
+ * @param res
+ */
 async function getAllSensors(req: express.Request, res: express.Response) {
     res.status(200)
         .json({ sensors: await SensorManager.getInstance().getSensorsId() });
 }
 
+/**
+ * Générer un QRCode pour un capteur et le mettre à disposition du public.
+ * @param req
+ * @param res
+ */
 async function generateQRCode(req: express.Request, res: express.Response) {
     const sensor = await SensorManager.getInstance().getSensor(req.body.sensor, {
         updateData: false,
@@ -110,6 +137,11 @@ async function generateQRCode(req: express.Request, res: express.Response) {
     });
 }
 
+/**
+ * Révoquer un QRCode, il ne sera plus utilisable.
+ * @param req
+ * @param res
+ */
 async function revokeQRCode(req: express.Request, res: express.Response) {
     const sensor = await SensorManager.getInstance().getSensor(req.body.sensor, {
         updateData: false,
@@ -126,6 +158,11 @@ async function revokeQRCode(req: express.Request, res: express.Response) {
     res.status(200).send();
 }
 
+/**
+ * Se déconnecter.
+ * @param req
+ * @param res
+ */
 async function disconnect(req: express.Request, res: express.Response) {
     const cookie = getAuthCookie(req.headers.cookie);
     if(cookie.hasAuthCookie) {
