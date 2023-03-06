@@ -1,1 +1,7 @@
-{"updateInterval":600000,"expirationTime":1800000,"tokenExpirationTime":1800000,"deleteTokenInterval":86400000,"adminPassword":"e73b79a0b10f8cdb6ac7dbe4c0a5e25776e1148784b86cf98f7d6719d472af69"}
+{
+    "updateInterval": 600000,
+    "expirationTime": 1800000,
+    "tokenExpirationTime": 1800000,
+    "deleteTokenInterval": 86400000,
+    "adminPassword": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+}

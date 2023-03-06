@@ -7,18 +7,29 @@
     <title>Changer le mot de passe</title>
   </head>
   <body>
-    <form id="login-form">
+    <form id="edit-password-form">
       <h2>Changer le mot de passe</h2>
       <div class="change-password">
         <input
           type="password"
-          id="password"
+          id="new-password"
           class="password-input"
           name="password"
           placeholder="​"
           required
         />
         <label for="password" class="password-label">Password</label>
+      </div>
+      <div class="change-password">
+        <input
+          type="password"
+          id="confirm-password"
+          class="password-input"
+          name="password"
+          placeholder="​"
+          required
+        />
+        <label for="password" class="password-label">Confirm password</label>
       </div>
       <button type="submit">Modifier</button>
       <div id="message" class="hidden">Message d'erreur</div>
