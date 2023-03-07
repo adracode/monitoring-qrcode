@@ -302,7 +302,7 @@ export class ConfigurationManager {
             `SELECT types_by_sensor.type_id as typeId, label FROM types_by_sensor LEFT JOIN types ON types_by_sensor.type_id = types.type_id WHERE sensor_id = ?`, sensorId
         );
         return {
-            label: labeledSensor.label ?? labeledSensor.sensorId,
+            label: labeledSensor.label,
             urlId: labeledSensor.urlId,
             type: types.reduce((acc: { [type: string]: string }, curr: { typeId: string, label: string }) => {
                 acc[curr.typeId] = curr.label ?? curr.typeId;

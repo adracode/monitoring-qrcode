@@ -40,10 +40,10 @@ async function showData(req: express.Request, res: express.Response) {
             if(formatted === data.type) {
                 formatted = `${data.type}: ${data.value}`;
             }
-            const titleAndData = formatted.split(':');
+            const titleAndData = formatted.split(':').map(text => text.trim());
             return {
                 title: titleAndData[0],
-                data: data.value == null ? 'Indisponible' : titleAndData[1]
+                data: data.value == null ? 'Indisponible' : titleAndData[1] == "" ? data.value : titleAndData[1]
             };
         })
     );
