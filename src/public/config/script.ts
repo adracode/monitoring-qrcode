@@ -3,6 +3,7 @@ enum Mode {
     QRCODES,
     PRINT,
     LABEL,
+    SETTINGS
 }
 
 let mode = Mode.CONFIG;
@@ -12,6 +13,8 @@ let labelsValue: { [id: string]: string | null } = {};
 
 const modalTitle = document.getElementById("confirm-revocation-title")!;
 const modal = document.getElementById("confirm-revoke")!;
+const errorMessage = document.getElementById('message')! as HTMLLabelElement;
+const passwordInputs = document.getElementsByClassName('password-input')! as HTMLCollectionOf<HTMLInputElement>;
 let selectionRevoke: HTMLElement;
 
 const tabs: {
@@ -85,6 +88,10 @@ const tabs: {
     label: {
         elements: document.querySelectorAll("#labels"),
         onSelect: () => mode = Mode.LABEL
+    },
+    settings: {
+        elements: document.querySelectorAll("#settings"),
+        onSelect: () => mode = Mode.SETTINGS
     }
 }
 
@@ -301,7 +308,7 @@ for(let input of document.querySelectorAll(".change-label")) {
             event.preventDefault()
         }
     });
-    input.addEventListener("input", (event) => {
+    input.addEventListener("input", () => {
         if(!input.classList.contains("modified")) {
             input.classList.add("modified")
         }
@@ -387,15 +394,6 @@ for(let disconnect of document.querySelectorAll(".disconnect-button")) {
 }
 
 /**
- * Gérer la modification du mot de passe.
- */
-for(let changePassword of document.querySelectorAll(".change-password-button")) {
-    changePassword.addEventListener("click", async (event) => {
-        window.location.href = "/password";
-    });
-}
-
-/**
  * Imprimer les QRCodes.
  */
 for(let printButton of document.querySelectorAll(".print-qrcodes")) {
@@ -434,6 +432,94 @@ document.querySelector("#confirm-revoke-button")!.addEventListener("click", asyn
     hide(sensor.querySelector(".revoke-qrcode")!)
     closeConfirm();
 });
+
+document.getElementById('edit-password-form')!.addEventListener('submit', async event => {
+    event.preventDefault();
+    const password = document.getElementById('new-password')! as HTMLInputElement;
+    const confirmPassword = document.getElementById('confirm-password')! as HTMLInputElement;
+    const data = { password: password.value, confirmPassword: confirmPassword.value };
+    try {
+        const response = await fetch('/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        switch(response.status) {
+            case 200:
+                password.classList.add('valid');
+                confirmPassword.classList.add('valid');
+                errorMessage.classList.add('valid');
+                errorMessage.innerText = 'Mot de passe modifié.';
+                errorMessage.classList.remove('hidden');
+                setTimeout(() => window.location.replace('/login'), 1000);
+                break;
+            default:
+                let responseData = await response.json();
+                password.classList.add('invalid');
+                confirmPassword.classList.add('invalid');
+                errorMessage.innerText = `${responseData.message ?? response.statusText}`;
+                errorMessage.classList.remove('hidden');
+        }
+    } catch(error) {
+        console.error(error);
+        password.classList.add('invalid');
+        confirmPassword.classList.add('invalid');
+        errorMessage.innerText = "Une erreur s'est produite";
+        errorMessage.classList.remove('hidden');
+    }
+});
+for(let input of passwordInputs) {
+    input.addEventListener('focus', event => {
+        passwordInputs[0].classList.remove('invalid');
+        passwordInputs[1].classList.remove('invalid');
+        errorMessage.innerText = "Message d'erreur";
+        errorMessage.classList.add('hidden');
+    });
+
+    input.addEventListener('input', event => {
+        passwordInputs[0].classList.remove('invalid');
+        passwordInputs[1].classList.remove('invalid');
+        errorMessage.innerText = "Message d'erreur";
+        errorMessage.classList.add('hidden');
+    });
+}
+
+/**
+ * Gérer la modification des paramètres.
+ */
+for(let changeLabel of document.querySelectorAll(".edit-text.for-setting > .change-label")) {
+    changeLabel.addEventListener("keydown", async (event) => {
+        if((event as KeyboardEvent).key === "Enter") {
+            if(mode != Mode.SETTINGS || !changeLabel.classList.contains("modified")) {
+                return;
+            }
+            const input = event.target as HTMLInputElement;
+            if(input == null || input.value === ""){
+                return;
+            }
+            const identifier = input.id.split("setting-")[1]
+            input.classList.remove("modified")
+            const response = await fetch("./setting", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: identifier,
+                    value: input.value
+                }),
+            });
+            if(response.status != 200){
+                input.value = labelsValue[input.id]!;
+                input.classList.add("modified");
+                return;
+            }
+            input.value = (await response.json()).value;
+            labelsValue[input.id] = input.value;
+            input.classList.add("validated");
+        }
+    });
+}
 
 /**
  * Fermer la fenêtre de confirmation.

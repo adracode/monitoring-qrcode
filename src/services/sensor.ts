@@ -8,17 +8,22 @@ export type ConfigurationSensor = Partial<{
     type: TypesLabel,
     urlId: string
 }>;
-type SensorSetting = {
-    [id: string]: any
+
+export type SensorSetting = {
+    value: any,
+    label?: string
+}
+type SensorSettings = {
+    [id: string]: SensorSetting
 }
 
 export class Sensor {
-    private static readonly settings: SensorSetting = {
-        updateInterval: 10 * 60 * 1_000,
-        expirationTime: 30 * 60 * 1_000,
-        tokenExpirationTime: 30 * 60 * 1_000,
-        deleteTokenInterval: 60 * 60 * 24 * 1_000,
-        adminPassword: undefined
+    private static readonly settings: SensorSettings = {
+        updateInterval: { value: 10 * 60 * 1_000 },
+        expirationTime: { value: 30 * 60 * 1_000 },
+        tokenExpirationTime: { value: 30 * 60 * 1_000 },
+        deleteTokenInterval: { value: 60 * 60 * 24 * 1_000 },
+        adminPassword: { value: undefined }
     }
 
     private readonly id: string;
@@ -35,9 +40,13 @@ export class Sensor {
      * Modifier un paramètre de la configuration générale.
      * @param id
      * @param value
+     * @param label
      */
-    public static setSetting(id: string, value: any) {
-        Sensor.settings[id] = value;
+    public static setSetting(id: string, value: any, label?: string) {
+        let setting = Sensor.settings[id] = {...Sensor.settings[id], value};
+        if(label != null){
+            setting.label = label;
+        }
     }
 
     /**
@@ -45,14 +54,23 @@ export class Sensor {
      * @param id
      */
     public static getSetting<T>(id: string): T {
-        return Sensor.settings[id] as T;
+        console.log(Sensor.settings, Sensor.settings[id])
+        return Sensor.settings[id]?.value as T;
+    }
+
+    public static getPublicSettings(): SensorSetting[] {
+        return Object.entries(this.settings).filter(([, setting]) => setting.label != null).map(([id, setting]) => ({...setting, id: id}));
+    }
+
+    public static isSettingPublic(id: string) : boolean {
+        return Sensor.settings[id].label != null;
     }
 
     /**
      * Savoir si les données du capteur ont besoin d'être mise à jour.
      */
     public needUpdate(): boolean {
-        return this.lastDatabaseUpdate < Date.now() - Sensor.settings.updateInterval;
+        return this.lastDatabaseUpdate < Date.now() - Sensor.settings.updateInterval.value;
     }
 
     /**
@@ -100,7 +118,7 @@ export class Sensor {
      * Peut arriver si le capteur physique n'envoie plus de données.
      */
     public isExpired(): boolean {
-        return this.dateOfData < Date.now() - Sensor.settings.expirationTime;
+        return this.dateOfData < Date.now() - Sensor.settings.expirationTime.value;
     }
 
     /**

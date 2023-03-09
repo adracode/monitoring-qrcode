@@ -1,7 +1,13 @@
 {
-    "updateInterval": 600000,
-    "expirationTime": 1800000,
+    "updateInterval": {
+        "label": "Mise à jour du cache (ms)",
+        "value": 6000
+    },
+    "expirationTime": {
+        "label": "Expiration des données (ms)",
+        "value": 180000
+    },
     "tokenExpirationTime": 1800000,
     "deleteTokenInterval": 86400000,
-    "adminPassword": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+    "adminPassword": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
 }

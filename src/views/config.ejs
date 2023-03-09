@@ -19,13 +19,15 @@
     <label for="select-label" class="label-page">
         Labels
     </label>
-    <input type="radio" id="select-print" class="select-page" name="select" value="3">
+    <input type="radio" id="select-print" class="select-page" name="select" value="4">
     <label for="select-print" class="label-page">
         Imprimer
     </label>
+    <input type="radio" id="select-settings" class="select-page" name="select" value="5">
+    <label for="select-settings" class="label-page">
+        Paramètres
+    </label>
     <div class="menu-buttons">
-        <button id="change-password" class="change-password-button confirm-button menu-button">Changer le mot de passe
-        </button>
         <button id="disconnect" class="disconnect-button cancel-button menu-button">Déconnexion</button>
     </div>
 </div>
@@ -35,7 +37,7 @@
             <div id="<%= sensor.name %>" class="box">
                 <h3><%= sensor.name %></h3>
                 <div class="edit-text for-qrcode">
-                <textarea rows=1 wrap="hard" class="change-label" placeholder="Label" name="label-<%= sensor.name %>"
+                <textarea rows=1 wrap="hard" class="change-label" placeholder="​" name="label-<%= sensor.name %>"
                         <% if(sensor.label != null) %>
                           id="label-<%= sensor.name %>"><%= sensor.label %></textarea>
                     <label for="label-<%= sensor.name %>" class="change-label-label">Label</label>
@@ -74,9 +76,9 @@
             <div class="box">
                 <h3><%= label.id %></h3>
                 <div class="edit-text for-type">
-                <textarea rows=1 class="change-label" placeholder="Label" name="label-<%= label.id %>"
+                <textarea rows=1 class="change-label" placeholder="​" name="label-<%= label.id %>"
                           id="label-<%= label.id %>"><%= label.label %></textarea>
-                    <label for="label-<%= label.id %>" class="change-label-label">Label</label>
+                    <label for="label-<%= label.id %>" class="change-label-label">Valeur</label>
                 </div>
             </div>
         <% } %>
@@ -88,6 +90,31 @@
                 </span>
             <span class="button-text">Imprimer</span>
         </button>
+    </div>
+    <div id="settings" class="tab hidden">
+        <form id="edit-password-form" class="box">
+            <h2>Changer le mot de passe</h2>
+            <div class="edit-text change-password">
+                <input class="password-input" id="new-password" name="password" placeholder="​" required type="password"/>
+                <label class="password-label change-label-label" for="new-password">Nouveau</label>
+            </div>
+            <div class="edit-text change-password">
+                <input class="password-input" id="confirm-password" name="password" placeholder="​" required type="password"/>
+                <label class="password-label change-label-label" for="confirm-password">Confirmer</label>
+            </div>
+            <button class="simple-button neutral-button">Modifier</button>
+            <div class="hidden" id="message">Message d'erreur</div>
+        </form>
+        <% for(let setting of settings){ %>
+            <div class="box">
+                <h3><%= setting.label %></h3>
+                <div class="edit-text for-setting">
+                <textarea rows=1 class="change-label" placeholder="​" name="setting-<%= setting.id %>"
+                          id="setting-<%= setting.id %>"><%= setting.value %></textarea>
+                    <label for="setting-<%= setting.id %>" class="change-label-label">Valeur</label>
+                </div>
+            </div>
+        <% } %>
     </div>
     <div id="confirm-revoke" class="confirm">
         <div>

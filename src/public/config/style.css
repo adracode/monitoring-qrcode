@@ -22,6 +22,7 @@ body {
     transform: translate(0, 50%) translate(0, -4px);
 }
 
+.simple-button,
 .menu button {
     color: #fff;
     font-size: 16px;
@@ -170,9 +171,9 @@ input:hover + .label-page {
 .edit-text {
     position: relative;
     padding: 15px 0 0;
-    margin-top: 10px;
 }
 
+.edit-text > input,
 .edit-text > textarea {
     padding: 7px 0 7px 10px;
     margin-bottom: 10px;
@@ -185,6 +186,7 @@ input:hover + .label-page {
     font-size: 1.3rem;
 }
 
+.edit-text > input:focus,
 .edit-text > textarea:focus {
     padding-bottom: 6px;
     border-bottom: 3px solid;
@@ -194,6 +196,7 @@ input:hover + .label-page {
     border-bottom-right-radius: 0;
 }
 
+.edit-text > input::placeholder,
 .edit-text > textarea::placeholder {
     color: transparent;
 }
@@ -203,14 +206,17 @@ input:hover + .label-page {
     min-height: 100px;
 }
 
+.edit-text > input:focus.modified,
 .edit-text > textarea:focus.modified {
     border-image: linear-gradient(to right, #ff0000, #ffabab) 1;
 }
 
-.edit-text > textarea.validated {
+.edit-text > input:focus.validated,
+.edit-text > textarea:focus.validated {
     border-image: linear-gradient(to right, #05cb00, #b3ffab) 1;
 }
 
+.edit-text > input:focus ~ .change-label-label,
 .edit-text > textarea:focus ~ .change-label-label {
     top: 0;
     font-size: 1rem;
@@ -227,6 +233,7 @@ input:hover + .label-page {
     color: #9b9b9b;
 }
 
+.edit-text > input:placeholder-shown ~ label,
 .edit-text > textarea:placeholder-shown ~ label {
     font-size: 1.3rem;
     cursor: text;
@@ -236,7 +243,10 @@ input:hover + .label-page {
     transition-duration: 0.2s;
 }
 
-.edit-text > textarea:required, .edit-text > textarea:invalid {
+.edit-text > input:required,
+.edit-text > input:invalid,
+.edit-text > textarea:required,
+.edit-text > textarea:invalid {
     box-shadow: none;
 }
 
@@ -341,7 +351,33 @@ input:hover + .label-page {
     color: #fff;
 }
 
+/* Paramètres */
+
+h2 {
+    white-space: nowrap;
+}
+
+#edit-password-form {
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    padding: 20px;
+}
+
+#message {
+    color: #ff0000;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+    text-align: center;
+}
+
+#message.valid {
+    color: #05cb00;
+}
+
 /* Fenêtre de confirmation */
+
 .confirm {
     display: none;
     position: fixed;
@@ -401,6 +437,10 @@ input:hover + .label-page {
 .cancel-button {
     background: #d85261;
     margin-right: 10px;
+}
+
+.neutral-button {
+    background-color: #915cff;
 }
 
 .print {

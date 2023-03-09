@@ -4,6 +4,8 @@ import { getView } from "../utils/path";
 import { create, toString } from "qrcode";
 import { getAuthCookie } from "../utils/cookie";
 import { TokenManager } from "../services/token";
+import { Sensor } from "../services/sensor";
+import fs from "fs";
 
 type NewSensorConfig = {
     sensorId: string;
@@ -38,6 +40,7 @@ async function configPage(req: express.Request, res: express.Response) {
             await sensors.getAllDataTypes(),
             true
         ),
+        settings: Sensor.getPublicSettings()
     });
 }
 
@@ -158,6 +161,23 @@ async function revokeQRCode(req: express.Request, res: express.Response) {
     res.status(200).send();
 }
 
+async function setSetting(req: express.Request, res: express.Response){
+    const id = req.body.id;
+    const value = req.body.value;
+    if(id == null || value == null || Sensor.getSetting(id) == null || !Sensor.isSettingPublic(id)){
+        return res.status(403).json({message: "Valeur invalide"});
+    }
+    const newValue = +value;
+    if(isNaN(newValue) || newValue <= 0){
+        return res.status(403).send({message: "Valeur invalide"});
+    }
+    Sensor.setSetting(id, value);
+    let jsonString = JSON.parse(fs.readFileSync("config.json", "utf-8")) as any;
+    jsonString[id] = typeof jsonString[id] !== "object" ? newValue : { ...jsonString[id], value: newValue };
+    await fs.promises.writeFile("config.json", JSON.stringify(jsonString, null, 4));
+    res.status(200).send({ message: "", value: newValue });
+}
+
 /**
  * Se déconnecter.
  * @param req
@@ -183,5 +203,6 @@ module.exports = {
     getAllSensors,
     generateQRCode,
     revokeQRCode,
+    setSetting,
     disconnect
 }

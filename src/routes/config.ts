@@ -18,6 +18,8 @@ router.post("/generate", parser.json(), config.generateQRCode);
 
 router.delete("/revoke", parser.json(), config.revokeQRCode);
 
+router.post("/setting", parser.json(), config.setSetting)
+
 router.post("/disconnect", parser.json(), config.disconnect);
 
 export default router;

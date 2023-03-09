@@ -3,7 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import routes from "./routes";
 import fs from "fs"
-import { Sensor } from "./services/sensor";
+import { Sensor, SensorSetting } from "./services/sensor";
 
 const app = express();
 app.set("view engine", "ejs");
@@ -25,7 +25,10 @@ app.use(errorHandling);
 dotenv.config();
 try {
     Object.entries(JSON.parse(fs.readFileSync("config.json", "utf-8")))
-        .forEach(([id, setting]) => Sensor.setSetting(id, setting));
+        .forEach(([id, value]) => {
+            let setting: SensorSetting = typeof value === "object" ? {...value} as SensorSetting : { value: value as any };
+            Sensor.setSetting(id, setting.value, setting.label)
+        });
 } catch(e) {
     console.log(e)
     console.error("Can't load settings file, using default values.")
