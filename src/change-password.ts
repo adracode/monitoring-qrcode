@@ -41,9 +41,6 @@ function getPassword(prompt: string) {
 }
 
 async function main() {
-    console.log(Date.now().toString());
-    1678186544218
-    1678186736
     console.log("Changment du mot de passe administrateur.\nPar défaut le mot de passe est admin");
     console.log("Nouveau mot de passe: ");
     mutableStdout.muted = true;
