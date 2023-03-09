@@ -1,4 +1,4 @@
-.PHONY: build up down dev
+.PHONY: build up down dev password
 
 all: build up
 
@@ -13,6 +13,9 @@ down:
 
 dev:
 	npm run build && npm run start
+
+password:
+	node ./build/change-password.js
 
 clean:
 clear:
