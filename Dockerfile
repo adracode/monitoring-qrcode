@@ -5,6 +5,8 @@ COPY tsconfig-backend.json ./
 COPY tsconfig-frontend.json ./
 COPY .env ./
 COPY src/ ./src/
+COPY favicon.png ./
+COPY config.json ./
 RUN npm install
 
 FROM base as production
