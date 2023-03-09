@@ -4,10 +4,11 @@ services:
   app:
     build:
       target: production
-    expose:
-      - "3000"
     ports:
-      - "3000:3000"
+# Ports is HOST:CONTAINER
+# CONTAINER had to be 3000
+# HOST can be change by the port you want to expose
+      - "5000:3000"
     volumes:
       - configuration-db:/app/database
       - type: bind
