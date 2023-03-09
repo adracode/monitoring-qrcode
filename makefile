@@ -18,7 +18,7 @@ dev:
 	npm run build && npm run start
 
 password:
-	./changePassword.sh
+	@ ./changePassword.sh
 
 clean:
 clear:
