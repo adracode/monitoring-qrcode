@@ -9,13 +9,16 @@ up:
 	docker-compose -f docker-compose.prod.yml up
 
 down:
-	docker-compose down
+	docker-compose -f docker-compose.prod.yml stop
+
+restart:
+	docker-compose -f docker.compose.prod.yml restart
 
 dev:
 	npm run build && npm run start
 
 password:
-	node ./build/change-password.js
+	./changePassword.sh
 
 clean:
 clear:
