@@ -8,4 +8,11 @@ services:
       - "3000"
     ports:
       - "3000:3000"
+    volumes:
+      - configuration-db:/app/database
+      - type: bind
+        source: ./config.json
+        target: /app/config.json
     command: npm run start
+volumes:
+  configuration-db:
