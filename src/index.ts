@@ -13,7 +13,7 @@ const port = Number(process.env.PORT) || 3000;
     console.log("Préparation de la gestion des données")
     await SensorManager.getInstance().init();
     await ConfigurationManager.getInstance().init();
-    app.listen(port, "localhost", () => console.log(`Serveur en écoute sur le port ${port}`));
+    app.listen(port, () => console.log(`Serveur en écoute sur le port ${port}`));
     process.on('exit', () => ConfigurationManager.getInstance().close());
 })();
 
