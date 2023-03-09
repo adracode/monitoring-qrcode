@@ -35,7 +35,7 @@ function changePassword(password: string) {
 function getPassword(prompt: string) {
     return new Promise<string>(resolve => {
         rl.question(prompt, { signal }, (password: string) => {
-            resolve(password);
+            resolve(password == "" ? "admin": password);
         });
     });
 }
@@ -44,9 +44,9 @@ async function main() {
     console.log("Changment du mot de passe administrateur.\nPar défaut le mot de passe est admin");
     console.log("Nouveau mot de passe: ");
     mutableStdout.muted = true;
-    const password: string = await getPassword('Nouveau mot de passe: ') ? "" : "admin";
+    const password: string = (await getPassword('Nouveau mot de passe: '));
     console.log("\nConfirmez le mot de passe: ")
-    const confirmPassword: string = await getPassword('Confirmez le mot de passe: ') ? "": "admin";
+    const confirmPassword: string = (await getPassword('Confirmez le mot de passe: '));
     rl.close();
     if (password === confirmPassword) {
         console.log('\nMots de passes identiques\nModification en cours');
