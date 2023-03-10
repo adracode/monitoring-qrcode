@@ -7,10 +7,18 @@ import fs from "fs";
 
 const port = 3000;
 
-const server = https.createServer({
-    key: fs.readFileSync(process.env.PRIVATE_KEY_PATH as string),
-    cert: fs.readFileSync(process.env.CERTIFICATE_PATH as string)
-}, app);
+let server;
+try {
+    server = https.createServer({
+        key: fs.readFileSync(process.env.PRIVATE_KEY_PATH as string),
+        cert: fs.readFileSync(process.env.CERTIFICATE_PATH as string)
+    }, app);
+    console.log("Création du serveur HTTPS")
+} catch(e){
+    server = app;
+    console.log("Impossible de créer un serveur HTTPS:\n" + e)
+    console.log("Création du serveur HTTP")
+}
 
 (async () => {
     console.log("Initialisation de la connexion aux bases de données")

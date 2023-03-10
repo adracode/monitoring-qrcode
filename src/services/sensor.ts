@@ -54,7 +54,6 @@ export class Sensor {
      * @param id
      */
     public static getSetting<T>(id: string): T {
-        console.log(Sensor.settings, Sensor.settings[id])
         return Sensor.settings[id]?.value as T;
     }
 
