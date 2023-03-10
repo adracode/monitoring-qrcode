@@ -8,12 +8,18 @@ services:
 # Ports is HOST:CONTAINER
 # CONTAINER had to be 3000
 # HOST can be change by the port you want to expose
-      - "5000:3000"
+      - "443:3000"
     volumes:
       - configuration-db:/app/database
       - type: bind
         source: ./config.json
         target: /app/config.json
+      - type: bind
+        source: ./private.key
+        target: /app/private.key
+      - type: bind
+        source: ./certificate.crt
+        target: /app/certificate.crt
     command: npm run start
 volumes:
   configuration-db:
