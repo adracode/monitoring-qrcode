@@ -33,7 +33,7 @@ La configuration du nom du capteur et les données affichés se fait sur l'ongle
 Le nom est modifiable dans le champ `Label`.  
  ![](img/Configuration%20du%20label.png)
 
-L'indication que le nom est modifié est indiqué avec une barre rouge.
+L'indication que le nom est modifié est indiqué avec une barre rouge.  
 ![](img/Configuration%20du%20label%20-%20Modification.png)
 
 Si l'on quitte le champ texte sans valider, le nom n'est pas modifié et revient à la valeur de départ.  
@@ -81,7 +81,7 @@ Pour spécifier un label, il y a quelques règles à respecter pour un affichage
 Comme pour les labels des capteurs, un indicateur est présent lorsque le label est modifié.  
 ![](img/Configuration%20batterie.png)
 
-De même, il faut appuyer sur *Entrée* pour valider.
+De même, il faut appuyer sur *Entrée* pour valider.  
 ![](img/Configuration%20batterie%20-%20Validé.png)
 
 ### Impression
