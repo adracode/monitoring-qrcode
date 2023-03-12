@@ -1,11 +1,11 @@
 {
     "updateInterval": {
         "label": "Mise à jour du cache (ms)",
-        "value": 6000
+        "value": 600000
     },
     "expirationTime": {
         "label": "Expiration des données (ms)",
-        "value": 180000
+        "value": 1800000
     },
     "tokenExpirationTime": 1800000,
     "deleteTokenInterval": 86400000,

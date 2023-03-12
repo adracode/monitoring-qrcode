@@ -168,7 +168,7 @@ async function setSetting(req: express.Request, res: express.Response){
         return res.status(403).json({message: "Valeur invalide"});
     }
     const newValue = +value;
-    if(isNaN(newValue) || newValue <= 0){
+    if(isNaN(newValue) || !isFinite(newValue) || newValue <= 0){
         return res.status(403).send({message: "Valeur invalide"});
     }
     Sensor.setSetting(id, value);
