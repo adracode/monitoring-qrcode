@@ -7,13 +7,13 @@
 </head>
 <body>
 <div class="menu">
-    <input type="radio" id="select-config" class="select-page" name="select" value="1" checked>
-    <label for="select-config" class="label-page">
-        Configuration
-    </label>
-    <input type="radio" id="select-qrcode" class="select-page" name="select" value="2">
+    <input type="radio" id="select-qrcode" class="select-page" name="select" value="2" checked>
     <label for="select-qrcode" class="label-page">
         QRCodes
+    </label>
+    <input type="radio" id="select-config" class="select-page" name="select" value="1">
+    <label for="select-config" class="label-page">
+        Configuration
     </label>
     <input type="radio" id="select-label" class="select-page" name="select" value="3">
     <label for="select-label" class="label-page">
@@ -32,11 +32,11 @@
     </div>
 </div>
 <div class="main">
-    <div id="qrcodes" class="tab">
+    <div id="qrcodes" class="tab hidden">
         <% for(let sensor of sensors){ %>
             <div id="<%= sensor.name %>" class="box">
                 <h3><%= sensor.name %></h3>
-                <div class="edit-text for-qrcode">
+                <div class="edit-text for-qrcode hidden">
                 <textarea rows=1 wrap="hard" class="change-label" placeholder="​" name="label-<%= sensor.name %>"
                         <% if(sensor.label != null) %>
                           id="label-<%= sensor.name %>"><%= sensor.label %></textarea>
@@ -45,7 +45,7 @@
                 <a href="<%= sensor.link ?? "" %>" class="link-sensor hidden">Lien vers le capteur</a>
                 <img id="code-<%= sensor.name %>" class="qr-code-svg hidden" src="" alt=""/>
                 <% for(let type of sensor.types){ %>
-                    <div class="config-data-type">
+                    <div class="config-data-type hidden">
                         <input type="checkbox" name="checkbox" class="set-data-type"
                                id="<%= `${sensor.name}:${type.dataType}` %>"
                         <% if(type.isDisplayed){ %>
@@ -56,13 +56,13 @@
                                class="type-choice"><%= type.dataType %></label>
                     </div>
                 <% } %>
-                <button class="button-slider generate-qrcode hidden">
+                <button class="button-slider generate-qrcode">
                 <span class="circle" aria-hidden="true">
                     <span class="icon arrow"></span>
                 </span>
                     <span class="button-text">Générer</span>
                 </button>
-                <button class="button-slider revoke-qrcode hidden">
+                <button class="button-slider revoke-qrcode">
                 <span class="circle" aria-hidden="true">
                     <span class="icon arrow"></span>
                 </span>

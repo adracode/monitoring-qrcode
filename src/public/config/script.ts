@@ -185,34 +185,41 @@ function initPrint(qrcodes: { title: string, img: HTMLImageElement }[]): HTMLDiv
 }
 
 /**
+ * Comportement lors du clic sur un onglet
+ * @param tab
+ */
+async function clickOnTab(tab: Element){
+    const nextId = tab.id.split("select-")[1];
+    for(let [key, value] of Object.entries(tabs)) {
+        if(key !== nextId) {
+            if(value.onQuit != null) {
+                await value.onQuit();
+            }
+            value.elements.forEach(hide);
+            value.performOnElements?.forEach(elements => {
+                if(elements.onQuit != null) {
+                    elements.elements.forEach(element => elements.onQuit!(element));
+                }
+            });
+        }
+    }
+    const next = tabs[nextId];
+    if(next.onSelect != null) {
+        await next.onSelect();
+    }
+    next.elements.forEach(show);
+    next.performOnElements?.forEach(elements => {
+        if(elements.onSelect != null) {
+            elements.elements.forEach(element => elements.onSelect!(element));
+        }
+    })}
+
+/**
  * Affichage des différents onglets.
  */
 for(let tab of document.querySelectorAll(".select-page")) {
-    tab.addEventListener("click", async () => {
-        const nextId = tab.id.split("select-")[1];
-        for(let [key, value] of Object.entries(tabs)) {
-            if(key !== nextId) {
-                if(value.onQuit != null) {
-                    await value.onQuit();
-                }
-                value.elements.forEach(hide);
-                value.performOnElements?.forEach(elements => {
-                    if(elements.onQuit != null) {
-                        elements.elements.forEach(element => elements.onQuit!(element));
-                    }
-                });
-            }
-        }
-        const next = tabs[nextId];
-        if(next.onSelect != null) {
-            await next.onSelect();
-        }
-        next.elements.forEach(show);
-        next.performOnElements?.forEach(elements => {
-            if(elements.onSelect != null) {
-                elements.elements.forEach(element => elements.onSelect!(element));
-            }
-        });
+    tab.addEventListener("click", async () => {;
+        clickOnTab(tab);
     })
 }
 
@@ -530,3 +537,8 @@ window.onclick = function(event) {
         closeConfirm();
     }
 }
+
+/**
+ * Chargement de la première page
+ */
+clickOnTab(document.querySelector('#select-qrcode')!);

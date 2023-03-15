@@ -21,6 +21,23 @@ Mot de passe par défaut: `admin`.
 
 Cette page est uniquement accessible par authentification.
 Toutes les configurations sont instantanées, il n'y a pas de bouton de validation.
+### Gestion des QRCodes
+
+La configuration des QRCodes se fait sur l'onglet `QRCodes`.  
+![](img/Configuration des QRCodes.png)
+
+La page d'affichage des données n'est en aucun cas accessible si le capteur n'a pas de QRCode associé.  
+La création d'un QRCode se fait via la bouton `Générer`.  
+![](img/Générer%20QRCode.png)
+
+Une fois généré, le QRCode apparaît avec un lien menant directement à la page d'affichage des données.  
+Ce lien et le QRCode redirigent vers la même page.
+Si le besoin de révoquer un QRCode se ressent, c'est-à-dire de le rendre inutilisable, il faut utiliser le bouton `Révoquer`.  
+![](img/Révoquer%20QRCode.png)
+
+Cette action ouvre une fenêtre de confirmation, dans le cas où ce bouton est appuyé par erreur.  
+S'il est révoqué, les QRCodes qui ont été imprimés ne seront plus utilisable.  
+![](img/Confirmer%20la%20révocation.png)
 
 ### Capteurs
 
@@ -47,24 +64,6 @@ Pour configuration les données affichées à l'utilisateur, il suffit de clique
 Un bouton violet signifie que la donnée est affichée, le bouton blanc indiquant l'inverse.  
 Par exemple, le CO2 sera affiché contrairement à l'humidité.  
 ![](img/Configuration%20des%20données.png)
-
-### Configuration des QRCodes
-
-La configuration des QRCodes se fait sur l'onglet `QRCodes`.  
-![](img/Configuration des QRCodes.png)
-
-La page d'affichage des données n'est en aucun cas accessible si le capteur n'a pas de QRCode associé.  
-La création d'un QRCode se fait via la bouton `Générer`.  
-![](img/Générer%20QRCode.png)
-
-Une fois généré, le QRCode apparaît avec un lien menant directement à la page d'affichage des données.  
-Ce lien et le QRCode redirigent vers la même page.
-Si le besoin de révoquer un QRCode se ressent, c'est-à-dire de le rendre inutilisable, il faut utiliser le bouton `Révoquer`.  
-![](img/Révoquer%20QRCode.png)
-
-Cette action ouvre une fenêtre de confirmation, dans le cas où ce bouton est appuyé par erreur.  
-S'il est révoqué, les QRCodes qui ont été imprimés ne seront plus utilisable.  
-![](img/Confirmer%20la%20révocation.png)
 
 ### Labels des données
 
@@ -100,7 +99,8 @@ Ensuite, cliquez sur le bouton `Imprimer`, la fenêtre d'impression du navigateu
 Les QRCodes sont regroupés en deux colonnes et trois lignes, ce qui en donne six par pages.  
 Cette disposition est configurable dans une certaine mesure selon les paramètres d'impression du navigateur.    
 On peut par exemple modifier leur taille ou encore en fusionner les pages.  
-![img.png](img/Impression paramètres.png)
+
+![img.png](img/Impression%20paramètres.png)
 
 ### Paramètres
 
