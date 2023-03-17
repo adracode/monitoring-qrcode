@@ -6,20 +6,22 @@ const config = require("../controllers/config");
 
 router.get("/", config.configPage);
 
-router.get("/get-qrcodes", config.getQRCodes);
+router.get("/qrcodes", config.getQRCodes);
 
-router.post("/set", parser.json(), config.setConfiguration);
+router.post("/config", parser.json(), config.setConfiguration);
 
-router.post("/set-label", parser.json(), config.setTypeLabel);
+router.post("/label", parser.json(), config.setTypeLabel);
 
 router.post("/sensors", config.getAllSensors);
 
 router.post("/generate", parser.json(), config.generateQRCode);
 
-router.delete("/revoke", parser.json(), config.revokeQRCode);
+router.post("/setting", parser.json(), config.setSetting);
 
-router.post("/setting", parser.json(), config.setSetting)
+router.post("/password", parser.json(), config.changePassword);
 
 router.post("/disconnect", parser.json(), config.disconnect);
+
+router.delete("/revoke", parser.json(), config.revokeQRCode);
 
 export default router;

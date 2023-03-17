@@ -2,7 +2,6 @@ import express from "express";
 import sensors from "./sensors";
 import config from "./config";
 import login from "./login";
-import password from "./password"
 import auth from "../controllers/auth";
 import { getPublic, getView } from "../utils/path";
 import fs from "fs";
@@ -14,13 +13,6 @@ router.use(
     "/login",
     express.static(getPublic("login"), { extensions: ["html"] }),
     login
-);
-
-router.use(
-    "/password",
-    auth,
-    express.static(getPublic("password"), { extensions: ["html"] }),
-    password
 );
 
 router.use(

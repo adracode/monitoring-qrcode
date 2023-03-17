@@ -195,6 +195,32 @@ async function disconnect(req: express.Request, res: express.Response) {
     res.status(302).json({ url: "/login" })
 }
 
+const { changePasswordFromWeb } = require("../services/password");
+
+/**
+ * Changer le mot de passe administrateur.
+ * @param req
+ * @param res
+ */
+async function changePassword(req: express.Request, res: express.Response) {
+    const newPassword = req.body?.password;
+    const confirmPassword = req.body?.confirmPassword;
+    if(newPassword !== confirmPassword) {
+        res.status(400).json({ message: "Les mots de passes ne sont pas identiques." })
+        return;
+    }
+    if(changePasswordFromWeb(newPassword)) {
+        TokenManager.getInstance().deleteAllTokens();
+        res.clearCookie("authToken", {
+            httpOnly: true,
+            sameSite: "lax"
+        });
+        res.sendStatus(200);
+        return;
+    }
+    res.status(500).json({ message: "Erreur durant la modification du mot de passe" });
+}
+
 module.exports = {
     configPage,
     getQRCodes,
@@ -204,5 +230,6 @@ module.exports = {
     generateQRCode,
     revokeQRCode,
     setSetting,
-    disconnect
+    disconnect,
+    changePassword
 }

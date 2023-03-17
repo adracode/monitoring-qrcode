@@ -142,7 +142,7 @@ function closeConfirm() {
 async function loadQrCodes() {
     if(!loadedQRCodes) {
         loadedQRCodes = true;
-        const res = await fetch("./get-qrcodes", {
+        const res = await fetch("./qrcodes", {
             method: "GET"
         });
         let qrCodes: { [id: string]: { qrcode: string, link: string } } = await res.json();
@@ -238,7 +238,7 @@ for(let setType of document.querySelectorAll(".set-data-type")) {
             return;
         }
         (setType as HTMLInputElement).disabled = true;
-        await fetch("./set", {
+        await fetch("./config", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -348,7 +348,7 @@ for(let changeLabel of document.querySelectorAll(".edit-text.for-qrcode > .chang
             const input = event.target as HTMLTextAreaElement;
             const identifier = input.id.split("label-")[1]
             input.classList.remove("modified")
-            await fetch("./set", {
+            await fetch("./config", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -374,7 +374,7 @@ for(let changeLabel of document.querySelectorAll(".edit-text.for-type > .change-
             const input = event.target as HTMLInputElement;
             const identifier = input.id.split("label-")[1]
             input.classList.remove("modified")
-            await fetch("./set-label", {
+            await fetch("./label", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -446,7 +446,7 @@ document.getElementById('edit-password-form')!.addEventListener('submit', async 
     const confirmPassword = document.getElementById('confirm-password')! as HTMLInputElement;
     const data = { password: password.value, confirmPassword: confirmPassword.value };
     try {
-        const response = await fetch('/password', {
+        const response = await fetch('./password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
