@@ -1,6 +1,18 @@
-.PHONY: build up down dev password
+.PHONY: all init build up down restart dev password clean clear
 
 all: build up
+
+init:
+ifeq ($(wildcard config.json),)
+	cp config.json.sample config.json
+else
+	@echo "Le fichier config.json est déjà initialisé"
+endif
+ifeq ($(wildcard .env),)
+	cp .env.sample .env
+else
+	@echo "Le fichier .env est déjà initialisé"
+endif
 
 build:
 	docker-compose -f docker-compose.prod.yml build

@@ -271,7 +271,7 @@ export class ConfigurationManager {
             return this.getInstance();
         }
         let database = await open({
-            filename: process.env.CONFIG_DATABASE as string,
+            filename: "database/configuration.db",
             driver: wrapped.Database
         });
         await database.exec(ConfigurationManager.getSQLiteFileContent("create-config.sql"));

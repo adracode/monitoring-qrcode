@@ -8,11 +8,11 @@ router.get("/", config.configPage);
 
 router.get("/qrcodes", config.getQRCodes);
 
-router.post("/config", parser.json(), config.setConfiguration);
+router.get("/sensors", config.getAllSensors);
+
+router.post("/", parser.json(), config.setConfiguration);
 
 router.post("/label", parser.json(), config.setTypeLabel);
-
-router.post("/sensors", config.getAllSensors);
 
 router.post("/generate", parser.json(), config.generateQRCode);
 

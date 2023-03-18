@@ -10,8 +10,8 @@ const port = 3000;
 let server;
 try {
     server = https.createServer({
-        key: fs.readFileSync(process.env.PRIVATE_KEY_PATH as string),
-        cert: fs.readFileSync(process.env.CERTIFICATE_PATH as string)
+        key: fs.readFileSync("private.key"),
+        cert: fs.readFileSync("certificate.crt")
     }, app);
     console.log("Création du serveur HTTPS")
 } catch(e){

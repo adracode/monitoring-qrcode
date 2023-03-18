@@ -1,2 +1,8 @@
-node_modules
-npm-debug.log
+**/*
+!src
+!package.json
+!tsconfig-backend.json
+!tsconfig-frontend.json
+!.env
+!favicon.png
+!config.json
