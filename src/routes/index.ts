@@ -28,16 +28,6 @@ router.use("/favicon.ico", (req, res) => {
     res.status(200).send(favicon);
 });
 
-router.use(express.static(getPublic("home")), async (req, res) => {
-    const pageTitle = "Page d'accueil projet QR Code";
-    let data: { title: string; data: any[] }[];
-    data = [{
-        title: "Utilisation",
-        data: ["L'objectif de ce site est de mettre à disposition au public les données des capteurs présents dans les différents bâtiments, à travers des QRCodes."]
-    }, {
-        title: "Auteurs: ", data: ["Benjamin LE CESNE", "Antoine LEFEBVRE"] },
-    ];
-    res.status(404).render(getView('home'), { home: pageTitle, data })
-});
+router.use(express.static(getPublic("home")));
 
 export default router;
