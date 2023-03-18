@@ -238,7 +238,7 @@ for(let setType of document.querySelectorAll(".set-data-type")) {
             return;
         }
         (setType as HTMLInputElement).disabled = true;
-        await fetch("./config", {
+        await fetch("./", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -348,7 +348,7 @@ for(let changeLabel of document.querySelectorAll(".edit-text.for-qrcode > .chang
             const input = event.target as HTMLTextAreaElement;
             const identifier = input.id.split("label-")[1]
             input.classList.remove("modified")
-            await fetch("./config", {
+            await fetch("./", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
