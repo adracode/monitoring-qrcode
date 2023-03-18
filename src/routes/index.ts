@@ -28,6 +28,8 @@ router.use("/favicon.ico", (req, res) => {
     res.status(200).send(favicon);
 });
 
-router.use(express.static(getPublic("home")));
+router.use("/", express.static(getPublic("home")));
+
+router.get("*", (req, res) => res.redirect("/"));
 
 export default router;
