@@ -1,11 +1,5 @@
 #!/bin/bash
 
-if [ $EUID -eq 0 ]; then
-    echo "Le script a été lancé avec sudo"
-else
-    echo "Le script a été lancé sans sudo"
-fi
-
 file=config.json
 
 # Vérifie si le fichier JSON existe
