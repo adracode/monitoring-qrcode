@@ -6,7 +6,7 @@ else
     echo "Le script a été lancé sans sudo"
 fi
 
-file=test.json
+file=config.json
 
 # Vérifie si le fichier JSON existe
 if ! [ -f $file ]; then
