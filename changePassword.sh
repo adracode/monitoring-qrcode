@@ -10,7 +10,7 @@ file=config.json
 
 # Vérifie si le fichier JSON existe
 if ! [ -f $file ]; then
-  echo "Erreur : le fichier fichier.json n'existe pas."
+  echo -e "Erreur : le fichier config.json n'existe pas.\nReportez-vous à la documentation pour initialiser l'application."
   exit 1
 fi
 
@@ -18,11 +18,11 @@ fi
 json=$(cat $file)
 
 # Demande à l'utilisateur de taper un nouveau mot de passe
-echo "Entrez un nouveau mot de passe (30 secondes pour répondre) :"
+echo "Entrez un nouveau mot de passe (admin par défaut) :"
 if read -t 30 -s password1; then
 
   # Demande à l'utilisateur de confirmer le nouveau mot de passe
-  echo "Confirmez le nouveau mot de passe (30 secondes pour répondre) :"
+  echo "Confirmez le nouveau mot de passe (admin par défaut) :"
   if read -t 30 -s password2; then
 
     # Vérifie si les deux mots de passe sont identiques
@@ -50,7 +50,7 @@ if read -t 30 -s password1; then
       if command -v docker > /dev/null && [ "$(docker ps -q --filter "name=qrcode-monitoring-app")" ]; then
         # Redémarre le conteneur Docker
         docker-compose -f docker-compose.prod.yml restart
-        echo "Le conteneur Docker qrcode-monitoring-app a été redémarré."
+        echo "Le serveur a été redémarré."
       fi
 
     else
