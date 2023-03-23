@@ -59,7 +59,7 @@ async function getQRCodes(req: express.Request, res: express.Response) {
         if(urlId != null) {
             qrCodes[sensor.getId()] = {
                 qrcode: `data:image/svg+xml;base64,${Buffer.from(
-                    await toString(create(`${req.get('host')}/sensors/${urlId}`).segments, {
+                    await toString(create(`${req.protocol}://${req.get('host')}/sensors/${urlId}`).segments, {
                         type: "svg",
                         margin: 2,
                     })
@@ -134,7 +134,7 @@ async function generateQRCode(req: express.Request, res: express.Response) {
     const urlId = ConfigurationManager.getInstance().generateUrlId(sensor);
     res.status(200).send({
         qrcode: `data:image/svg+xml;base64,${Buffer.from(
-            await toString(create(`${req.get('host')}/sensors/${urlId}`).segments, { type: "svg" })
+            await toString(create(`${req.protocol}://${req.get('host')}/sensors/${urlId}`).segments, { type: "svg" })
         ).toString("base64")}`,
         link: `/sensors/${urlId!}`,
     });
