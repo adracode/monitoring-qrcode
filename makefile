@@ -5,6 +5,7 @@ all: build up
 init:
 ifeq ($(wildcard config.json),)
 	cp config.json.sample config.json
+	@ ./changePassword.sh
 else
 	@echo "Le fichier config.json est déjà initialisé"
 endif

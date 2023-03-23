@@ -41,20 +41,4 @@ function changePasswordFromWeb(newPassword: string): boolean {
     }
 }
 
-/**
- * Changer le mot de passe depuis le terminal.
- * @param newPassword Nouveau mot de passe
- */
-function changePasswordFromExternal(newPassword: string): boolean {
-    try {
-        const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
-        changePasswordInFile(newHash);
-        return true;
-    } catch(e) {
-        console.log(e)
-        console.error("Can't change password");
-        return false;
-    }
-}
-
-module.exports = { changePasswordFromWeb, changePasswordFromExternal };
+module.exports = { changePasswordFromWeb };
